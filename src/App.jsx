@@ -1,34 +1,39 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Materials from "./pages/Materials";
-import NotFound from "./pages/NotFound";
-import Security from "./pages/Security";
-import Profile from "./pages/Profile";
+import {
+  Login,
+  Dashboard,
+  Materials,
+  Security,
+  Profile,
+  NotFound,
+} from "./pages";
 import { ThemeProvider } from "./context/ThemeContext";
+// import { useStateContext } from "./contexts/ContextProvider";
+import RequireAuth from "./contexts/RequireAuth";
 
 function App() {
+  const roles = ["ADMIN", "USER", "LEARNER", "TEACHER"];
+
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+      <Routes>
+        {/* Default route: redirect to /login if not authenticated */}
+        <Route index element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+
+        <Route element={<RequireAuth allowedRoles={roles} />}>
           <Route path="/" element={<Layout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="materials" element={<Materials />} />
-            <Route path="security" element={<Security />} />
-            <Route path="profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/materials" element={<Materials />} />
+            <Route path="/security" element={<Security />} />
+            <Route path="/profile" element={<Profile />} />
             <Route index element={<Navigate to="/dashboard" replace />} />
           </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+        </Route>
+        {/* Redirect all unknown routes to NotFound page */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </ThemeProvider>
   );
 }
