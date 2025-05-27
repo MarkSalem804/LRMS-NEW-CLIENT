@@ -62,7 +62,7 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
 
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/dashboard")}
               className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Go to home"
             >

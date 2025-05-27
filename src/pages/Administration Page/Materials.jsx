@@ -9,9 +9,9 @@ import {
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
-import MaterialCard from "../components/MaterialCard";
+import MaterialCard from "../../components/MaterialCard";
 import { Link } from "react-router-dom";
-import MaterialsDetailsModal from "../components/modals/MaterialsDetailsModal";
+import MaterialsDetailsModal from "../../components/modals/MaterialsDetailsModal";
 
 const learningAreas = [
   "MTB-MLE",

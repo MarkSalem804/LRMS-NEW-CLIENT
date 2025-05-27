@@ -7,6 +7,8 @@ import {
   Security,
   Profile,
   NotFound,
+  AboutUs,
+  UsersManagement,
 } from "./pages";
 import { ThemeProvider } from "./context/ThemeContext";
 // import { useStateContext } from "./contexts/ContextProvider";
@@ -21,6 +23,7 @@ function App() {
         {/* Default route: redirect to /login if not authenticated */}
         <Route index element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/about-us" element={<AboutUs />} />
 
         <Route element={<RequireAuth allowedRoles={roles} />}>
           <Route path="/" element={<Layout />}>
@@ -28,6 +31,7 @@ function App() {
             <Route path="/materials" element={<Materials />} />
             <Route path="/security" element={<Security />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/users-management" element={<UsersManagement />} />
             <Route index element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Route>

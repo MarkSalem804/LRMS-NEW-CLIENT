@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import SubjectCard from "../components/SubjectCard";
-import DashboardStats from "../components/DashboardStats";
-import learningAreas from "../data/learningAreas";
+import SubjectCard from "../../components/SubjectCard";
+import DashboardStats from "../../components/DashboardStats";
+import learningAreas from "../../data/learningAreas";
 import {
   FaBook,
   FaFileAlt,

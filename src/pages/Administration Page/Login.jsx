@@ -13,12 +13,12 @@ import {
   FaBook,
 } from "react-icons/fa";
 import { FcAddDatabase } from "react-icons/fc";
-import { useStateContext } from "../contexts/ContextProvider";
-import HeaderLogo from "../assets/deped_logo.png";
-import DepEdLogo from "../assets/Logo-DepEd-1.png";
-import PilipinasLogo from "../assets/Bagong-Pilipinas-Logo.png";
-import LoginBackground from "../assets/LoginPageBackground.jpg";
-import userService from "../services/user-endpoints";
+import { useStateContext } from "../../contexts/ContextProvider";
+import HeaderLogo from "../../assets/deped_logo.png";
+import DepEdLogo from "../../assets/Logo-DepEd-1.png";
+import PilipinasLogo from "../../assets/Bagong-Pilipinas-Logo.png";
+import LoginBackground from "../../assets/LoginPageBackground.jpg";
+import userService from "../../services/user-endpoints";
 import PropTypes from "prop-types";
 
 // Simple Toast component
@@ -102,7 +102,7 @@ const Login = () => {
 
         if (res?.success) {
           setAuth(res.data.user);
-          localStorage.setItem("authTicket", JSON.stringify(res.data.user));
+          localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
           navigate("/dashboard");
         } else {
           setToast("Authentication failed");
@@ -218,6 +218,15 @@ const Login = () => {
                         One stop shop for all learning materials
                       </p>
                     </div>
+                  </div>
+
+                  <div className="flex justify-center mt-8 md:mt-10">
+                    <Link
+                      to="/about-us"
+                      className="inline-block px-40 py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                    >
+                      About Us
+                    </Link>
                   </div>
                 </div>
               </div>

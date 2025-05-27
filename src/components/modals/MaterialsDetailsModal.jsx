@@ -21,7 +21,7 @@ const MaterialsDetailsModal = ({ material, isOpen, onClose }) => {
             className="bg-white dark:bg-gray-800 rounded-lg p-8 w-full max-w-4xl mx-4 shadow-xl"
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
+              <h3 className="text-lg text-gray-800 dark:text-white">
                 {material.title} Details
               </h3>
               <button

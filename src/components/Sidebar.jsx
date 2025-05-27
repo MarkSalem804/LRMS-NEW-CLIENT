@@ -43,7 +43,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       items: [
         {
           name: "Users Management",
-          path: "/admin/users",
+          path: "/users-management",
           icon: FaUsers,
         },
         {

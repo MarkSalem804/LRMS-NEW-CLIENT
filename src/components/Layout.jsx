@@ -19,16 +19,15 @@ const Layout = () => {
           isSidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        <div className="relative w-full flex flex-col flex-1">
+        <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900">
           <Header onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-          <main
-            className={`flex-grow transition-all duration-200 ease-in-out ${
-              isSidebarOpen ? "p-6 mt-3" : "p-6 mt-3"
-            }`}
-          >
-            <Outlet />
-          </main>
         </div>
+
+        <main
+          className={`flex-grow overflow-y-auto transition-all duration-200 ease-in-out p-6`}
+        >
+          <Outlet />
+        </main>
         {/* <Footer /> */}
       </div>
     </div>
