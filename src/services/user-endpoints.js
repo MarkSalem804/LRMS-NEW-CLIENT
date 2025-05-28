@@ -67,6 +67,12 @@ function updateProfile(userId, profileData) {
     .then((res) => res.data);
 }
 
+function changePassword(userId, profileData) {
+  return axios
+    .patch(`${BASE_URL}/users/changePassword/${userId}`, profileData)
+    .then((res) => res.data);
+}
+
 export default {
   authenticate,
   getAllUsers,
@@ -74,4 +80,5 @@ export default {
   deleteUser,
   updateUser,
   updateProfile,
+  changePassword,
 };

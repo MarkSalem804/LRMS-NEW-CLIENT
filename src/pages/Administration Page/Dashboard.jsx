@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import SubjectCard from "../../components/SubjectCard";
 import DashboardStats from "../../components/DashboardStats";
 import learningAreas from "../../data/learningAreas";
@@ -10,6 +10,9 @@ import {
   FaChalkboardTeacher,
   FaBookReader,
 } from "react-icons/fa";
+import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
+import { useStateContext } from "../../contexts/ContextProvider";
+import userService from "../../services/user-endpoints";
 
 const categories = [
   {
@@ -56,14 +59,76 @@ const categories = [
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const { auth, setAuth } = useStateContext();
+
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
+  const [userToChangePassword, setUserToChangePassword] = useState(null);
+  const [showPasswordChangeSuccess, setShowPasswordChangeSuccess] =
+    useState(false);
+
+  const handleChangePassword = async (userId, newPassword) => {
+    try {
+      await userService.changePassword(userId, { newPassword });
+      console.log("Password changed successfully for user:", userId);
+      setShowPasswordChangeSuccess(true);
+      setTimeout(() => {
+        setShowPasswordChangeSuccess(false);
+      }, 3000);
+
+      if (auth && auth.id) {
+        console.log("Dashboard: Updating auth context after password change.");
+        const updatedAuth = { ...auth, isChanged: true };
+        setAuth(updatedAuth);
+        localStorage.setItem("lrms-auth", JSON.stringify(updatedAuth));
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      if (error.response && error.response.data) {
+        console.error("Server Error Details:", error.response.data);
+      }
+      alert("Failed to change password.");
+    }
+  };
 
   useEffect(() => {
-    // Simulate loading data
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 800);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    console.log("Dashboard useEffect running. Auth state:", auth);
+
+    console.log("Dashboard: Checking condition:");
+    console.log("  auth is", auth);
+    console.log("  auth?.isChanged is", auth?.isChanged);
+    console.log("  isChangePasswordModalOpen is", isChangePasswordModalOpen);
+
+    if (auth && auth.isChanged === false) {
+      console.log(
+        "Dashboard: Conditions met to open change password modal.",
+        auth
+      );
+      setUserToChangePassword(auth);
+      console.log(
+        "Dashboard: Setting userToChangePassword to auth object",
+        auth
+      );
+      console.log("Dashboard: Calling setIsChangePasswordModalOpen(true)");
+      setIsChangePasswordModalOpen(true);
+    } else {
+      console.log(
+        "Dashboard: Conditions not met to open modal or auth state is changed.",
+        auth
+      );
+      if (isChangePasswordModalOpen) {
+        console.log("Dashboard: Auth state is changed, closing modal.");
+        setIsChangePasswordModalOpen(false);
+      }
+    }
+  }, [auth, isChangePasswordModalOpen]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -134,6 +199,30 @@ const Dashboard = () => {
           </div>
         </>
       )}
+
+      {/* Render the ChangePasswordModal */}
+      <ChangePasswordModal
+        user={userToChangePassword}
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        onSave={handleChangePassword}
+      />
+
+      {/* Success Message Pop-up for password change */}
+      <AnimatePresence>
+        {showPasswordChangeSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-4 right-4 z-50"
+          >
+            <div className="bg-green-500 bg-opacity-90 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-2">
+              <p className="text-sm">Password successfully changed!</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

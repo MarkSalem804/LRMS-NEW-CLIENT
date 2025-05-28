@@ -103,6 +103,9 @@ const Login = () => {
         if (res?.success) {
           setAuth(res.data.user);
           localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
+
+          // Always navigate to the dashboard after successful login
+          console.log("Successful login. Redirecting to Dashboard.");
           navigate("/dashboard");
         } else {
           setToast("Authentication failed");

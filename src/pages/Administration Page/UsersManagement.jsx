@@ -1,12 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import { FaEdit, FaTrash, FaEye, FaUser } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUser, FaLock } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import userService from "../../services/user-endpoints";
 import UserProfileModal from "../../components/modals/UserProfileModal";
 import RegisterUserModal from "../../components/modals/RegisterUserModal";
 import ConfirmationDialog from "../../components/modals/ConfirmationDialog";
 import { useStateContext } from "../../contexts/ContextProvider";
+import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
 
 const UsersManagement = () => {
   const { auth } = useStateContext();
@@ -29,11 +30,20 @@ const UsersManagement = () => {
   const [userToEdit, setUserToEdit] = useState(null);
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
 
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
+  const [userToChangePassword, setUserToChangePassword] = useState(null);
+  const [showPasswordChangeSuccess, setShowPasswordChangeSuccess] =
+    useState(false);
+
+  console.log(auth);
+
   // Function to fetch users
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const data = await userService.getAllUsers();
+      console.log("[fetchUsers] Data received:", data);
       setAllUsers(data.data);
     } catch (err) {
       setError(err);
@@ -71,12 +81,10 @@ const UsersManagement = () => {
     setSelectedUser(null); // Clear selected user when modal is closed
   };
 
-  // Function to open the register modal
   const openRegisterModal = () => {
     setIsRegisterModalOpen(true);
   };
 
-  // Function to close the register modal
   const closeRegisterModal = () => {
     setIsRegisterModalOpen(false);
   };
@@ -165,6 +173,37 @@ const UsersManagement = () => {
     }
   };
 
+  // Function to open the change password modal
+  const openChangePasswordModal = (user) => {
+    setUserToChangePassword(user);
+    setIsChangePasswordModalOpen(true);
+  };
+
+  // Function to close the change password modal
+  const closeChangePasswordModal = () => {
+    setIsChangePasswordModalOpen(false);
+    setUserToChangePassword(null);
+  };
+
+  // Function to handle password change
+  const handleChangePassword = async (userId, newPassword) => {
+    try {
+      await userService.changePassword(userId, { newPassword });
+      console.log("Password changed successfully for user:", userId);
+      closeChangePasswordModal();
+      setShowPasswordChangeSuccess(true);
+      setTimeout(() => {
+        setShowPasswordChangeSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error changing password:", error);
+      if (error.response && error.response.data) {
+        console.error("Server Error Details:", error.response.data);
+      }
+      alert("Failed to change password.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 text-center dark:text-white">Loading users...</div>
@@ -216,6 +255,18 @@ const UsersManagement = () => {
           >
             <div className="bg-green-500 bg-opacity-90 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-2">
               <p className="text-sm">Profile successfully updated!</p>
+            </div>
+          </motion.div>
+        )}
+        {showPasswordChangeSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-4 right-4 z-50"
+          >
+            <div className="bg-green-500 bg-opacity-90 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-2">
+              <p className="text-sm">Password successfully changed!</p>
             </div>
           </motion.div>
         )}
@@ -293,6 +344,13 @@ const UsersManagement = () => {
                         <FaEdit size={16} />
                       </button>
                       <button
+                        className="text-yellow-600 dark:text-yellow-500 hover:text-yellow-900 dark:hover:text-yellow-700 mr-3"
+                        title="Change Password"
+                        onClick={() => openChangePasswordModal(user)}
+                      >
+                        <FaLock size={16} />
+                      </button>
+                      <button
                         className="text-red-600 dark:text-red-500 hover:text-red-900 dark:hover:text-red-700"
                         title="Delete User"
                         onClick={() => handleDelete(user)}
@@ -361,6 +419,16 @@ const UsersManagement = () => {
           isEditing={true}
           onSave={handleUpdateUser}
         />
+
+        {/* Render the ChangePasswordModal */}
+        {auth.isChanged === false && (
+          <ChangePasswordModal
+            user={userToChangePassword}
+            isOpen={isChangePasswordModalOpen}
+            onClose={closeChangePasswordModal}
+            onSave={handleChangePassword}
+          />
+        )}
       </div>
     </div>
   );
