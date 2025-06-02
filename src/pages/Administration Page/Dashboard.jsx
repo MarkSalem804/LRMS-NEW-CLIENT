@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import SubjectCard from "../../components/SubjectCard";
 import DashboardStats from "../../components/DashboardStats";
-import learningAreas from "../../data/learningAreas";
 import {
   FaBook,
   FaFileAlt,
@@ -67,17 +65,46 @@ const Dashboard = () => {
   const [showPasswordChangeSuccess, setShowPasswordChangeSuccess] =
     useState(false);
 
+  // Define mock learningAreas data with material counts
+  const learningAreas = [
+    { id: 1, name: "Filipino", materialCount: 350 },
+    { id: 2, name: "English", materialCount: 420 },
+    { id: 3, name: "Mathematics", materialCount: 510 },
+    { id: 4, name: "Science", materialCount: 380 },
+    { id: 5, name: "Apan (Araling Panlipunan)", materialCount: 290 },
+    {
+      id: 6,
+      name: "EPP (Edukasyong Pantahanan at Pangkabuhayan)",
+      materialCount: 150,
+    },
+    {
+      id: 7,
+      name: "TLE (Technology and Livelihood Education)",
+      materialCount: 220,
+    },
+    { id: 8, name: "EsP (Edukasyon sa Pagpapakatao)", materialCount: 180 },
+    {
+      id: 9,
+      name: "MAPEH (Music, Arts, Physical Education, and Health)",
+      materialCount: 310,
+    },
+  ];
+
+  // Calculate total materials for progress bar
+  const totalMaterials = learningAreas.reduce(
+    (sum, area) => sum + (area.materialCount || 0),
+    0
+  );
+
   const handleChangePassword = async (userId, newPassword) => {
     try {
       await userService.changePassword(userId, { newPassword });
-      console.log("Password changed successfully for user:", userId);
       setShowPasswordChangeSuccess(true);
       setTimeout(() => {
         setShowPasswordChangeSuccess(false);
       }, 3000);
 
       if (auth && auth.id) {
-        console.log("Dashboard: Updating auth context after password change.");
         const updatedAuth = { ...auth, isChanged: true };
         setAuth(updatedAuth);
         localStorage.setItem("lrms-auth", JSON.stringify(updatedAuth));
@@ -99,24 +126,8 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Dashboard useEffect running. Auth state:", auth);
-
-    console.log("Dashboard: Checking condition:");
-    console.log("  auth is", auth);
-    console.log("  auth?.isChanged is", auth?.isChanged);
-    console.log("  isChangePasswordModalOpen is", isChangePasswordModalOpen);
-
     if (auth && auth.isChanged === false) {
-      console.log(
-        "Dashboard: Conditions met to open change password modal.",
-        auth
-      );
       setUserToChangePassword(auth);
-      console.log(
-        "Dashboard: Setting userToChangePassword to auth object",
-        auth
-      );
-      console.log("Dashboard: Calling setIsChangePasswordModalOpen(true)");
       setIsChangePasswordModalOpen(true);
     } else {
       console.log(
@@ -124,7 +135,6 @@ const Dashboard = () => {
         auth
       );
       if (isChangePasswordModalOpen) {
-        console.log("Dashboard: Auth state is changed, closing modal.");
         setIsChangePasswordModalOpen(false);
       }
     }
@@ -181,48 +191,99 @@ const Dashboard = () => {
 
           <DashboardStats />
 
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
-            Learning Areas
-          </h2>
+          {/* Add a grid container for Learning Areas and Recent Uploads */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Learning Areas with Progress Bars - Now in a grid column */}
+            <div>
+              {/* Add Learning Areas title inside the grid column */}
+              <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+                Learning Areas
+              </h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div className="space-y-4">
+                  {learningAreas.map((area) => (
+                    <div key={area.id} className="flex flex-col space-y-2">
+                      <div className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span>{area.name}</span>
+                        <span>{area.materialCount || 0} materials</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        {/* Ensure totalMaterials is not zero to avoid division by zero */}
+                        <div
+                          className="bg-blue-600 h-2 rounded-full dark:bg-blue-500"
+                          style={{
+                            width: `${
+                              totalMaterials > 0
+                                ? ((area.materialCount || 0) / totalMaterials) *
+                                  100
+                                : 0
+                            }%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {learningAreas.map((subject, index) => (
-              <motion.div
-                key={subject.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-              >
-                <SubjectCard subject={subject} />
-              </motion.div>
-            ))}
+            {/* Most Recent Uploads Section - New grid column */}
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center space-x-2">
+                <FaFileAlt
+                  className="text-primary-600 dark:text-primary-400"
+                  size={24}
+                />
+                <span>Most Recent Uploads</span>
+              </h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 h-full">
+                {/* Placeholder for Recent Uploads List (replace with actual data fetching and mapping) */}
+                <div className="space-y-3">
+                  {/* Mock Data - Replace with actual fetched data */}
+                  {Array.from({ length: 10 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="border-b border-gray-200 dark:border-gray-700 pb-3 last:border-b-0 last:pb-0"
+                    >
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        Material Title {index + 1}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Uploaded on: 2023-10-27 | By: Uploader Name
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                {/* End Mock Data */}
+              </div>
+            </div>
           </div>
+
+          {/* Render the ChangePasswordModal */}
+          <ChangePasswordModal
+            user={userToChangePassword}
+            isOpen={isChangePasswordModalOpen}
+            onClose={() => setIsChangePasswordModalOpen(false)}
+            onSave={handleChangePassword}
+          />
+
+          {/* Success Message Pop-up for password change */}
+          <AnimatePresence>
+            {showPasswordChangeSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                className="fixed bottom-4 right-4 z-50"
+              >
+                <div className="bg-green-500 bg-opacity-90 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-2">
+                  <p className="text-sm">Password successfully changed!</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
-
-      {/* Render the ChangePasswordModal */}
-      <ChangePasswordModal
-        user={userToChangePassword}
-        isOpen={isChangePasswordModalOpen}
-        onClose={() => setIsChangePasswordModalOpen(false)}
-        onSave={handleChangePassword}
-      />
-
-      {/* Success Message Pop-up for password change */}
-      <AnimatePresence>
-        {showPasswordChangeSuccess && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-4 right-4 z-50"
-          >
-            <div className="bg-green-500 bg-opacity-90 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-2">
-              <p className="text-sm">Password successfully changed!</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

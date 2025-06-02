@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import { FaEdit, FaTrash, FaEye, FaUser, FaLock } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUser, FaRedo } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import userService from "../../services/user-endpoints";
 import UserProfileModal from "../../components/modals/UserProfileModal";
 import RegisterUserModal from "../../components/modals/RegisterUserModal";
 import ConfirmationDialog from "../../components/modals/ConfirmationDialog";
 import { useStateContext } from "../../contexts/ContextProvider";
-import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
+import AdminResetPasswordModal from "../../components/modals/AdminResetPasswordModal";
 
 const UsersManagement = () => {
   const { auth } = useStateContext();
@@ -30,20 +30,19 @@ const UsersManagement = () => {
   const [userToEdit, setUserToEdit] = useState(null);
   const [showUpdateSuccess, setShowUpdateSuccess] = useState(false);
 
-  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
-    useState(false);
-  const [userToChangePassword, setUserToChangePassword] = useState(null);
-  const [showPasswordChangeSuccess, setShowPasswordChangeSuccess] =
-    useState(false);
+  // New state for admin password reset modal
+  const [isAdminResetModalOpen, setIsAdminResetModalOpen] = useState(false);
+  const [userToReset, setUserToReset] = useState(null);
+  const [showAdminResetSuccess, setShowAdminResetSuccess] = useState(false);
 
-  console.log(auth);
+  // New state for tracking password reset loading
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // Function to fetch users
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const data = await userService.getAllUsers();
-      console.log("[fetchUsers] Data received:", data);
       setAllUsers(data.data);
     } catch (err) {
       setError(err);
@@ -173,34 +172,44 @@ const UsersManagement = () => {
     }
   };
 
-  // Function to open the change password modal
-  const openChangePasswordModal = (user) => {
-    setUserToChangePassword(user);
-    setIsChangePasswordModalOpen(true);
+  // Function to open the admin reset password modal
+  const openAdminResetModal = (user) => {
+    setUserToReset(user);
+    setIsAdminResetModalOpen(true);
   };
 
-  // Function to close the change password modal
-  const closeChangePasswordModal = () => {
-    setIsChangePasswordModalOpen(false);
-    setUserToChangePassword(null);
+  // Function to close the admin reset password modal
+  const closeAdminResetModal = () => {
+    setIsAdminResetModalOpen(false);
+    setUserToReset(null);
   };
 
-  // Function to handle password change
-  const handleChangePassword = async (userId, newPassword) => {
+  // Function to handle admin password reset
+  const handleAdminPasswordReset = async (newPassword) => {
+    if (!userToReset || !userToReset.email) {
+      console.error("User email not available for reset.");
+      // Optionally show an error message to the admin
+      return;
+    }
     try {
-      await userService.changePassword(userId, { newPassword });
-      console.log("Password changed successfully for user:", userId);
-      closeChangePasswordModal();
-      setShowPasswordChangeSuccess(true);
+      setIsResettingPassword(true); // Set loading to true
+      await userService.resetPassword(userToReset.email, newPassword);
+      console.log("Password reset successfully for user:", userToReset.email);
+      closeAdminResetModal();
+      setShowAdminResetSuccess(true);
       setTimeout(() => {
-        setShowPasswordChangeSuccess(false);
+        setShowAdminResetSuccess(false);
       }, 3000);
     } catch (error) {
-      console.error("Error changing password:", error);
+      console.error("Error resetting password:", error);
+      // Handle error (e.g., display error message to admin)
       if (error.response && error.response.data) {
-        console.error("Server Error Details:", error.response.data);
+        alert("Failed to reset password: " + error.response.data.message);
+      } else {
+        alert("Failed to reset password.");
       }
-      alert("Failed to change password.");
+    } finally {
+      setIsResettingPassword(false); // Set loading to false regardless of success or failure
     }
   };
 
@@ -258,7 +267,7 @@ const UsersManagement = () => {
             </div>
           </motion.div>
         )}
-        {showPasswordChangeSuccess && (
+        {showAdminResetSuccess && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -266,7 +275,7 @@ const UsersManagement = () => {
             className="fixed bottom-4 right-4 z-50"
           >
             <div className="bg-green-500 bg-opacity-90 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-2">
-              <p className="text-sm">Password successfully changed!</p>
+              <p className="text-sm">Password reset successfully!</p>
             </div>
           </motion.div>
         )}
@@ -345,10 +354,10 @@ const UsersManagement = () => {
                       </button>
                       <button
                         className="text-yellow-600 dark:text-yellow-500 hover:text-yellow-900 dark:hover:text-yellow-700 mr-3"
-                        title="Change Password"
-                        onClick={() => openChangePasswordModal(user)}
+                        title="Reset Password"
+                        onClick={() => openAdminResetModal(user)}
                       >
-                        <FaLock size={16} />
+                        <FaRedo size={16} />
                       </button>
                       <button
                         className="text-red-600 dark:text-red-500 hover:text-red-900 dark:hover:text-red-700"
@@ -420,15 +429,14 @@ const UsersManagement = () => {
           onSave={handleUpdateUser}
         />
 
-        {/* Render the ChangePasswordModal */}
-        {auth.isChanged === false && (
-          <ChangePasswordModal
-            user={userToChangePassword}
-            isOpen={isChangePasswordModalOpen}
-            onClose={closeChangePasswordModal}
-            onSave={handleChangePassword}
-          />
-        )}
+        {/* Render the AdminResetPasswordModal */}
+        <AdminResetPasswordModal
+          user={userToReset}
+          isOpen={isAdminResetModalOpen}
+          onClose={closeAdminResetModal}
+          onSave={handleAdminPasswordReset}
+          isLoading={isResettingPassword}
+        />
       </div>
     </div>
   );

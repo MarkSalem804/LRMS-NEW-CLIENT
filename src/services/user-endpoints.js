@@ -5,7 +5,6 @@ const BASE_URL = "http://localhost:5001";
 // const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
 
 function authenticate(account) {
-  console.log("[user-endpoints] authenticate called with:", account);
   return new Promise((resolve, reject) => {
     axios
       .post(`${BASE_URL}/users/login`, account, {
@@ -13,7 +12,6 @@ function authenticate(account) {
         withCredentials: true,
       })
       .then((res) => {
-        console.log("[user-endpoints] Response received:", res.data);
         resolve(res.data);
       })
       .catch((err) => {
@@ -55,6 +53,12 @@ function deleteUser(id) {
     .then((res) => res.data);
 }
 
+function getUserProfile(id) {
+  return axios
+    .get(`${BASE_URL}/users/getUserProfile/${id}`)
+    .then((res) => res.data);
+}
+
 function updateUser(id, userData) {
   return axios
     .put(`${BASE_URL}/users/updateUser/${id}`, userData)
@@ -73,12 +77,36 @@ function changePassword(userId, profileData) {
     .then((res) => res.data);
 }
 
+function resetPassword(email, newPassword) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(
+        `${BASE_URL}/users/resetPassword`,
+        { email, newPassword },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      )
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
+}
+
 export default {
   authenticate,
+  getUserProfile,
   getAllUsers,
   registerUser,
   deleteUser,
   updateUser,
   updateProfile,
   changePassword,
+  resetPassword,
 };

@@ -13,11 +13,13 @@ import {
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import HeaderLogo from "../assets/deped_logo.png";
+import { useStateContext } from "../contexts/ContextProvider";
 
 const Header = ({ onMenuClick, isSidebarOpen }) => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { auth } = useStateContext();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -78,7 +80,7 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
                   size={20}
                 />
                 <span className="text-base font-medium text-gray-700 dark:text-gray-200 hidden">
-                  markjoseph.salem-ic@deped.gov.ph
+                  {auth.firstName}
                 </span>
               </button>
 
@@ -87,17 +89,18 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
                   <div className="py-2" role="menu" aria-orientation="vertical">
                     <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-700">
                       <p className="text-lg font-medium text-gray-900 dark:text-white">
-                        Mark
+                        {auth.firstName}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Administrator
+                        {auth.role}
                       </p>
                     </div>
 
                     <Link
-                      to="/profile"
+                      to={`/profile`}
                       className="flex items-center px-5 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                       role="menuitem"
+                      onClick={() => setIsDropdownOpen(false)}
                     >
                       <FaUserCircle className="mr-4" size={20} />
                       Profile
@@ -107,6 +110,7 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
                       to="/settings"
                       className="flex items-center px-5 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                       role="menuitem"
+                      onClick={() => setIsDropdownOpen(false)}
                     >
                       <FaCog className="mr-4" size={20} />
                       Settings
@@ -116,6 +120,7 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
                       to="/security"
                       className="flex items-center px-5 py-3 text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                       role="menuitem"
+                      onClick={() => setIsDropdownOpen(false)}
                     >
                       <FaShieldAlt className="mr-4" size={20} />
                       Security

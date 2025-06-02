@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+/* global __APP_VERSION__ */
 import { useState } from "react";
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
@@ -68,8 +69,6 @@ Toast.propTypes = {
 };
 
 const Login = () => {
-  console.log("Login component loaded");
-
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -85,27 +84,18 @@ const Login = () => {
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async (values) => {
-      console.log("Formik onSubmit called with values:", values);
-      // Basic console log
-      console.log("Form submitted");
-
       try {
         setLoading(true);
         setToast("");
 
-        // Log the values being sent
-        console.log("Sending values:", values.email);
-
         // Call the authentication service
         const res = await userService.authenticate(values);
-        console.log("Got response:", res);
 
         if (res?.success) {
           setAuth(res.data.user);
           localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
 
           // Always navigate to the dashboard after successful login
-          console.log("Successful login. Redirecting to Dashboard.");
           navigate("/dashboard");
         } else {
           setToast("Authentication failed");
@@ -375,7 +365,8 @@ const Login = () => {
                       />
                     </div>
                     <p className="text-sm text-gray-500 font-['Poppins']">
-                      SDO - Imus City all rights reserved
+                      SDO - Imus City all rights reserved - Version{" "}
+                      {__APP_VERSION__}
                     </p>
                   </div>
                 </div>

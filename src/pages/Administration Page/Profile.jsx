@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import userService from "../../services/user-endpoints";
+import { useStateContext } from "../../contexts/ContextProvider";
 import {
   FaUser,
   FaEnvelope,
@@ -7,74 +9,116 @@ import {
   FaBuilding,
   FaMapMarkerAlt,
 } from "react-icons/fa";
+import UserProfileModal from "../../components/modals/UserProfileModal";
 
 const Profile = () => {
-  const [formData, setFormData] = useState({
-    firstName: "Mark",
-    lastName: "Doe",
-    email: "mark.doe@deped.gov.ph",
-    phone: "+63 912 345 6789",
-    employeeId: "EMP123456",
-    department: "Information and Communications Technology",
-    position: "Administrator",
-    office: "Schools Division Office of Imus City",
-    address: "Imus City, Cavite",
-  });
+  const { auth } = useStateContext();
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [errors, setErrors] = useState({});
+  console.log(auth);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // Define fetchUserData outside useEffect so it can be called from multiple places
+  // Wrap fetchUserData in useCallback
+  const fetchUserData = useCallback(async () => {
+    console.log("[Profile] Fetching user data for auth.id:", auth?.id);
+    if (!auth || !auth.id) {
+      console.warn(
+        "[Profile] auth or auth.id is not available, skipping fetch."
+      );
+      setLoading(false); // Stop loading if auth.id is not available
+      setUserData(null); // Ensure no stale data is shown
+      return;
+    }
+    try {
+      setLoading(true);
+      // Use auth.id to fetch the profile of the currently logged-in user
+      const data = await userService.getUserProfile(auth.id);
+      console.log("[Profile] API response data:", data);
+      setUserData(data.data);
+      console.log("[Profile] UserData state after update:", data.data);
+    } catch (err) {
+      console.error("[Profile] Error fetching user data:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [auth, userService]);
+
+  useEffect(() => {
+    // Call fetchUserData from useEffect on component mount or when auth.id changes
+    fetchUserData();
+    // Add fetchUserData and auth.id as dependencies
+  }, [auth && auth.id, fetchUserData]); // Include fetchUserData in dependencies
+
+  if (loading) {
+    return (
+      <div className="p-6 text-center dark:text-white">Loading profile...</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-red-500">
+        Error loading profile: {error.message}
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="p-6 text-center dark:text-white">
+        User profile not found.
+      </div>
+    );
+  }
+
+  const userProfile = userData;
+
+  // Handle opening the modal
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-    }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    }
-    if (!formData.employeeId.trim()) {
-      newErrors.employeeId = "Employee ID is required";
-    }
-    if (!formData.department.trim()) {
-      newErrors.department = "Department is required";
-    }
-    if (!formData.position.trim()) {
-      newErrors.position = "Position is required";
-    }
-    if (!formData.office.trim()) {
-      newErrors.office = "Office is required";
-    }
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      // Add API call here to update profile
-      console.log("Profile updated:", formData);
-      setIsEditing(false);
+  // Handle saving changes from the modal (mimics handleUpdateUser from UsersManagement)
+  const handleSaveProfile = async (updatedData) => {
+    console.log("[Profile] Saving profile changes from modal:", updatedData);
+    if (!auth || !auth.id || !updatedData) {
+      console.error("[Profile] Cannot save: auth or updatedData is missing.");
+      return;
+    }
+
+    try {
+      // Ensure userId is included in the updatedData for the service function
+      // If your updateProfile service expects userId separately, adjust here
+      // Based on UsersManagement, it seems it expects userId as the first argument
+      // and the data object (without userId) as the second.
+      const dataToSave = { ...updatedData };
+      // Assuming updatedData from modal might contain an 'id' or 'userId'
+      // specific to the profile object itself, we might need to clean it
+      // depending on the exact structure your userService.updateProfile expects.
+      // For now, let's pass the updatedData as received from the modal,
+      // assuming userService.updateProfile handles the structure.
+
+      const response = await userService.updateProfile(auth.id, dataToSave); // Use auth.id and updatedData from modal
+      console.log("[Profile] Update successful from modal:", response);
+      handleCloseModal(); // Close the modal on success
+      // Optionally, show a success message here
+
+      // Re-fetch user data to show the updated information
+      fetchUserData();
+    } catch (error) {
+      console.error("[Profile] Error saving profile from modal:", error);
+      // Optionally, show an error message to the user
+      alert("Failed to update profile. Please try again."); // Simple alert for now
+      // Modal will remain open or you might handle it differently on error
     }
   };
 
@@ -101,15 +145,15 @@ const Profile = () => {
             </h2>
           </div>
           <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors"
+            onClick={handleOpenModal}
+            className="px-4 py-2 bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-800 text-white font-semibold rounded-md shadow transition-colors"
           >
-            {isEditing ? "Cancel" : "Edit Profile"}
+            Update Profile
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 First Name
@@ -117,17 +161,10 @@ const Profile = () => {
               <input
                 type="text"
                 name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border ${
-                  errors.firstName
-                    ? "border-red-500"
-                    : "border-gray-300 dark:border-gray-600"
-                } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                value={userProfile.firstName || "N/A"}
+                readOnly={true}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
               />
-              {errors.firstName && (
-                <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
-              )}
             </div>
 
             <div>
@@ -137,116 +174,90 @@ const Profile = () => {
               <input
                 type="text"
                 name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border ${
-                  errors.lastName
-                    ? "border-red-500"
-                    : "border-gray-300 dark:border-gray-600"
-                } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                value={userProfile.lastName || "N/A"}
+                readOnly={true}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
               />
-              {errors.lastName && (
-                <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
-              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaEnvelope className="text-gray-400" size={16} />
-                  </div>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`w-full pl-10 px-4 py-2 border ${
-                      errors.email
-                        ? "border-red-500"
-                        : "border-gray-300 dark:border-gray-600"
-                    } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                  />
-                </div>
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                )}
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Middle Name
+              </label>
+              <input
+                type="text"
+                name="middleName"
+                value={userProfile.middleName || "N/A"}
+                readOnly={true}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaPhone className="text-gray-400" size={16} />
-                  </div>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className={`w-full pl-10 px-4 py-2 border ${
-                      errors.phone
-                        ? "border-red-500"
-                        : "border-gray-300 dark:border-gray-600"
-                    } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                  />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaEnvelope className="text-gray-400" size={16} />
                 </div>
-                {errors.phone && (
-                  <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-                )}
+                <input
+                  type="email"
+                  name="emailAddress"
+                  value={userProfile.emailAddress || "N/A"}
+                  readOnly={true}
+                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
+                />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Employee ID
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaIdCard className="text-gray-400" size={16} />
-                  </div>
-                  <input
-                    type="text"
-                    name="employeeId"
-                    value={formData.employeeId}
-                    onChange={handleChange}
-                    className={`w-full pl-10 px-4 py-2 border ${
-                      errors.employeeId
-                        ? "border-red-500"
-                        : "border-gray-300 dark:border-gray-600"
-                    } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                  />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Phone Number
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaPhone className="text-gray-400" size={16} />
                 </div>
-                {errors.employeeId && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.employeeId}
-                  </p>
-                )}
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={userProfile.phoneNumber || "N/A"}
+                  readOnly={true}
+                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
+                />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Position
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Employee ID
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaIdCard className="text-gray-400" size={16} />
+                </div>
                 <input
                   type="text"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errors.position
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-600"
-                  } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                  name="employeeId"
+                  value={userProfile.employeeId || "N/A"}
+                  readOnly={true}
+                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
                 />
-                {errors.position && (
-                  <p className="mt-1 text-sm text-red-500">{errors.position}</p>
-                )}
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Position
+              </label>
+              <input
+                type="text"
+                name="position"
+                value={userProfile.position || "N/A"}
+                readOnly={true}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
+              />
             </div>
 
             <div>
@@ -260,18 +271,11 @@ const Profile = () => {
                 <input
                   type="text"
                   name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  className={`w-full pl-10 px-4 py-2 border ${
-                    errors.department
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-600"
-                  } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                  value={userProfile.department || "N/A"}
+                  readOnly={true}
+                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
                 />
               </div>
-              {errors.department && (
-                <p className="mt-1 text-sm text-red-500">{errors.department}</p>
-              )}
             </div>
 
             <div>
@@ -281,20 +285,13 @@ const Profile = () => {
               <input
                 type="text"
                 name="office"
-                value={formData.office}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border ${
-                  errors.office
-                    ? "border-red-500"
-                    : "border-gray-300 dark:border-gray-600"
-                } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                value={userProfile.office || "N/A"}
+                readOnly={true}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
               />
-              {errors.office && (
-                <p className="mt-1 text-sm text-red-500">{errors.office}</p>
-              )}
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Address
               </label>
@@ -304,33 +301,25 @@ const Profile = () => {
                 </div>
                 <textarea
                   name="address"
-                  value={formData.address}
-                  onChange={handleChange}
+                  value={userProfile.address || "N/A"}
+                  readOnly={true}
                   rows="3"
-                  className={`w-full pl-10 px-4 py-2 border ${
-                    errors.address
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-600"
-                  } rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none`}
-                  placeholder="Enter your complete address"
+                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none resize-none"
                 />
               </div>
-              {errors.address && (
-                <p className="mt-1 text-sm text-red-500">{errors.address}</p>
-              )}
             </div>
           </div>
-
-          <div className="flex justify-end space-x-4">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
+
+      {/* Render the UserProfileModal */}
+      <UserProfileModal
+        user={userProfile}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        isEditing={true}
+        onSave={handleSaveProfile}
+      />
     </div>
   );
 };
