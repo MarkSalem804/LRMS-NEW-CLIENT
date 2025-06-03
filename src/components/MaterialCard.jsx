@@ -43,7 +43,7 @@ const simpleHash = (str) => {
   return Math.abs(hash);
 };
 
-const MaterialCard = ({ material }) => {
+const MaterialCard = ({ material, onView }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [showDownloadPopup, setShowDownloadPopup] = useState(false);
@@ -86,7 +86,7 @@ const MaterialCard = ({ material }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         whileHover={{ scale: 1.02 }}
-        className={`rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 ${cardColorClass}`}
+        className={`m-4 rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 ${cardColorClass}`}
       >
         <div className="p-5">
           <div className="flex justify-between items-start mb-2">
@@ -94,7 +94,7 @@ const MaterialCard = ({ material }) => {
               {material.title}
             </h3>
             <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-300 text-xs font-medium rounded-full">
-              {material.type}
+              {material.typeName || "N/A"}
             </span>
           </div>
 
@@ -105,23 +105,24 @@ const MaterialCard = ({ material }) => {
           {/* Grade and Area/Subject Info */}
           <div className="text-xs text-gray-600 dark:text-gray-700 mb-3 space-y-1">
             <p>
-              <span className="font-semibold">Grade:</span> {material.grade}
+              <span className="font-semibold">Grade:</span>{" "}
+              {material.gradeLevelName || "N/A"}
             </p>
             <p>
-              {material.coreSubject ||
-                material.appliedSubject ||
-                material.track ||
-                material.area ||
-                material.subject ||
+              {material.subjectTypeName ||
+                material.trackName ||
+                material.strandName ||
+                material.learningAreaName ||
+                material.componentName ||
                 "N/A"}
             </p>
           </div>
 
           <div className="flex items-center text-sm text-gray-600 dark:text-gray-700 mb-4">
             <FaUser className="mr-1 inline-block" />
-            <span className="mr-3">{material.author}</span>
+            <span className="mr-3">{material.author || "N/A"}</span>
             <FaCalendarAlt className="mr-1 inline-block" />
-            <span>{new Date(material.dateAdded).toLocaleDateString()}</span>
+            <span>{new Date(material.uploadedAt).toLocaleDateString()}</span>
           </div>
 
           <div className="flex justify-between items-center">
@@ -142,7 +143,7 @@ const MaterialCard = ({ material }) => {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setShowDetailsModal(true)} // Show modal on click
+                onClick={() => setShowDetailsModal(true)}
                 className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 style={{
                   display: "flex",
@@ -227,7 +228,7 @@ const MaterialCard = ({ material }) => {
 
               <div className="text-sm text-gray-600 dark:text-gray-300">
                 <p>File: {material.title}</p>
-                <p>Type: {material.type}</p>
+                <p>Type: {material.typeName || "N/A"}</p>
                 <p>Size: {Math.floor(Math.random() * 10) + 1}MB</p>
               </div>
             </motion.div>
@@ -255,7 +256,7 @@ const MaterialCard = ({ material }) => {
                   {material.title} Details
                 </h3>
                 <button
-                  onClick={() => setShowDetailsModal(false)} // Close modal
+                  onClick={() => setShowDetailsModal(false)}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
                   <FaTimes size={20} />
@@ -274,7 +275,7 @@ const MaterialCard = ({ material }) => {
                 </p>
                 <p>
                   <strong>Date Added:</strong>{" "}
-                  {new Date(material.dateAdded).toLocaleDateString()}
+                  {new Date(material.uploadedAt).toLocaleDateString()}
                 </p>
                 <p>
                   <strong>Downloads:</strong> {material.downloads}
@@ -291,7 +292,7 @@ const MaterialCard = ({ material }) => {
       <MaterialsDetailsModal
         material={material}
         isOpen={showDetailsModal}
-        onClose={() => setShowDetailsModal(false)} // Close modal
+        onClose={() => setShowDetailsModal(false)}
       />
     </>
   );
@@ -301,13 +302,13 @@ MaterialCard.propTypes = {
   material: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     title: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
+    typeName: PropTypes.string,
     subject: PropTypes.string,
     description: PropTypes.string.isRequired,
-    dateAdded: PropTypes.string.isRequired,
-    downloads: PropTypes.number.isRequired,
-    rating: PropTypes.number.isRequired,
-    author: PropTypes.string.isRequired,
+    dateAdded: PropTypes.string,
+    downloads: PropTypes.number,
+    rating: PropTypes.number,
+    author: PropTypes.string,
     thumbnail: PropTypes.string,
     grade: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     area: PropTypes.string,
@@ -317,7 +318,15 @@ MaterialCard.propTypes = {
     subTrack: PropTypes.string,
     appliedSubject: PropTypes.string,
     specializedSubject: PropTypes.string,
+    gradeLevelName: PropTypes.string,
+    uploadedAt: PropTypes.string,
+    subjectTypeName: PropTypes.string,
+    trackName: PropTypes.string,
+    strandName: PropTypes.string,
+    learningAreaName: PropTypes.string,
+    componentName: PropTypes.string,
   }).isRequired,
+  onView: PropTypes.func.isRequired,
 };
 
 export default MaterialCard;

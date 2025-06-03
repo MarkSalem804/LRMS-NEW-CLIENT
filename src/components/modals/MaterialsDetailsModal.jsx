@@ -39,7 +39,7 @@ const MaterialsDetailsModal = ({ material, isOpen, onClose }) => {
                 </label>
                 <input
                   type="text"
-                  value={material.type}
+                  value={material.typeName || "N/A"}
                   readOnly
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 p-2"
                 />
@@ -72,7 +72,7 @@ const MaterialsDetailsModal = ({ material, isOpen, onClose }) => {
                 </label>
                 <input
                   type="text"
-                  value={new Date(material.dateAdded).toLocaleDateString()}
+                  value={new Date(material.uploadedAt).toLocaleDateString()}
                   readOnly
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 p-2"
                 />
@@ -118,10 +118,10 @@ const MaterialsDetailsModal = ({ material, isOpen, onClose }) => {
 MaterialsDetailsModal.propTypes = {
   material: PropTypes.shape({
     title: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
+    typeName: PropTypes.string,
     description: PropTypes.string.isRequired,
     author: PropTypes.string.isRequired,
-    dateAdded: PropTypes.string.isRequired,
+    uploadedAt: PropTypes.string.isRequired,
     downloads: PropTypes.number.isRequired,
     rating: PropTypes.number.isRequired,
   }).isRequired,

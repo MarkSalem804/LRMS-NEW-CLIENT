@@ -12,6 +12,7 @@ import {
 import MaterialCard from "../../components/MaterialCard";
 import { Link } from "react-router-dom";
 import MaterialsDetailsModal from "../../components/modals/MaterialsDetailsModal";
+import { getAllMaterials } from "../../services/lrms-endpoints"; // Import the API function
 
 const learningAreas = [
   "MTB-MLE",
@@ -124,6 +125,7 @@ const Materials = () => {
   const [viewType, setViewType] = useState("card");
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   // SHS Filter States
   const [selectedCoreSubject, setSelectedCoreSubject] = useState("");
@@ -185,961 +187,173 @@ const Materials = () => {
     setSelectedResourceType(""); // Reset resource type on grade/category change
   }, [searchParams]);
 
-  // Mock data - replace with actual API call
+  // Fetch materials from the API
   useEffect(() => {
-    // Simulated API call
     const fetchMaterials = async () => {
-      // Replace with actual API call
-      const mockMaterials = [
-        // Mathematics Materials
-        {
-          id: 1,
-          title: "Basic Addition",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Introduction to addition with numbers 1-10",
-          dateAdded: "2024-03-15",
-          downloads: 245,
-          rating: 4.5,
-          author: "Teacher Maria Santos",
-        },
-        {
-          id: 2,
-          title: "Number Patterns",
-          type: "Lesson Exemplar",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Understanding number sequences and patterns",
-          dateAdded: "2024-03-14",
-          downloads: 189,
-          rating: 4.7,
-          author: "Teacher John Cruz",
-        },
-        {
-          id: 3,
-          title: "Shapes and Space",
-          type: "Activity Guide",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Basic geometric shapes and spatial concepts",
-          dateAdded: "2024-03-13",
-          downloads: 156,
-          rating: 4.6,
-          author: "Teacher Ana Reyes",
-        },
-        {
-          id: 4,
-          title: "Multiplication Tables",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 3,
-          area: "Mathematics",
-          description: "Learning multiplication tables 1-10",
-          dateAdded: "2024-03-12",
-          downloads: 312,
-          rating: 4.8,
-          author: "Teacher Pedro Santos",
-        },
-        {
-          id: 5,
-          title: "Fractions Basics",
-          type: "Lesson Exemplar",
-          subject: "Mathematics",
-          grade: 4,
-          area: "Mathematics",
-          description: "Introduction to fractions and their representations",
-          dateAdded: "2024-03-11",
-          downloads: 278,
-          rating: 4.4,
-          author: "Teacher Maria Garcia",
-        },
-        {
-          id: 6,
-          title: "Algebra Fundamentals",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 7,
-          area: "Mathematics",
-          description: "Introduction to algebraic expressions and equations",
-          dateAdded: "2024-03-10",
-          downloads: 423,
-          rating: 4.9,
-          author: "Teacher Jose Reyes",
-        },
-        {
-          id: "math-long-desc-1",
-          title:
-            "Comprehensive Introduction to Early Mathematics Concepts for Grade 1 Students Including Counting, Number Recognition, and Basic Operations",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description:
-            "This extensive module is meticulously designed to introduce first-grade students to the fundamental concepts of mathematics. It covers a wide range of topics, starting from basic number recognition and counting up to 100, and progressing to simple addition and subtraction problems. The module incorporates various engaging activities, colorful illustrations, and interactive exercises to make learning enjoyable and effective. It aims to build a strong mathematical foundation by ensuring students understand not just the 'how' but also the 'why' behind these early mathematical ideas, preparing them for more advanced topics in subsequent grades.",
-          dateAdded: "2024-05-10",
-          downloads: 15,
-          rating: 4.2,
-          author: "Curriculum Development Team",
-          thumbnail:
-            "https://images.pexels.com/photos/1234592/pexels-photo-1234592.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-
-        // English Materials
-        {
-          id: 7,
-          title: "Phonics Basics",
-          type: "Module",
-          subject: "English",
-          grade: 1,
-          area: "English",
-          description: "Introduction to letter sounds and phonics",
-          dateAdded: "2024-03-09",
-          downloads: 198,
-          rating: 4.6,
-          author: "Teacher Sarah Johnson",
-        },
-        {
-          id: 8,
-          title: "Reading Comprehension",
-          type: "Lesson Exemplar",
-          subject: "English",
-          grade: 2,
-          area: "English",
-          description: "Basic reading comprehension strategies",
-          dateAdded: "2024-03-08",
-          downloads: 234,
-          rating: 4.7,
-          author: "Teacher Michael Brown",
-        },
-        {
-          id: 9,
-          title: "Grammar Essentials",
-          type: "Module",
-          subject: "English",
-          grade: 3,
-          area: "English",
-          description: "Basic grammar rules and sentence structure",
-          dateAdded: "2024-03-07",
-          downloads: 287,
-          rating: 4.5,
-          author: "Teacher Lisa Chen",
-        },
-        {
-          id: 10,
-          title: "Creative Writing",
-          type: "Activity Guide",
-          subject: "English",
-          grade: 5,
-          area: "English",
-          description: "Developing creative writing skills",
-          dateAdded: "2024-03-06",
-          downloads: 156,
-          rating: 4.8,
-          author: "Teacher David Wilson",
-        },
-        {
-          id: 11,
-          title: "Essay Writing",
-          type: "Module",
-          subject: "English",
-          grade: 8,
-          area: "English",
-          description: "Advanced essay writing techniques",
-          dateAdded: "2024-03-05",
-          downloads: 345,
-          rating: 4.7,
-          author: "Teacher Emily Parker",
-        },
-        {
-          id: 12,
-          title: "Literature Analysis",
-          type: "Lesson Exemplar",
-          subject: "English",
-          grade: 10,
-          area: "English",
-          description: "Analyzing literary works and themes",
-          dateAdded: "2024-03-04",
-          downloads: 289,
-          rating: 4.9,
-          author: "Teacher Robert Smith",
-        },
-
-        // Science Materials
-        {
-          id: 13,
-          title: "Living Things",
-          type: "Module",
-          subject: "Science",
-          grade: 1,
-          area: "Science",
-          description: "Introduction to living and non-living things",
-          dateAdded: "2024-03-03",
-          downloads: 267,
-          rating: 4.6,
-          author: "Teacher Maria Santos",
-        },
-        {
-          id: 14,
-          title: "Plant Life",
-          type: "Lesson Exemplar",
-          subject: "Science",
-          grade: 2,
-          area: "Science",
-          description: "Basic plant parts and their functions",
-          dateAdded: "2024-03-02",
-          downloads: 198,
-          rating: 4.7,
-          author: "Teacher John Cruz",
-        },
-        {
-          id: 15,
-          title: "Simple Machines",
-          type: "Activity Guide",
-          subject: "Science",
-          grade: 4,
-          area: "Science",
-          description: "Understanding basic machines and their uses",
-          dateAdded: "2024-03-01",
-          downloads: 234,
-          rating: 4.5,
-          author: "Teacher Ana Reyes",
-        },
-        {
-          id: 16,
-          title: "Solar System",
-          type: "Module",
-          subject: "Science",
-          grade: 6,
-          area: "Science",
-          description: "Exploring planets and space",
-          dateAdded: "2024-02-29",
-          downloads: 312,
-          rating: 4.8,
-          author: "Teacher Pedro Santos",
-        },
-        {
-          id: 17,
-          title: "Cell Biology",
-          type: "Lesson Exemplar",
-          subject: "Science",
-          grade: 8,
-          area: "Science",
-          description: "Introduction to cell structure and function",
-          dateAdded: "2024-02-28",
-          downloads: 278,
-          rating: 4.7,
-          author: "Teacher Maria Garcia",
-        },
-        {
-          id: 18,
-          title: "Chemical Reactions",
-          type: "Module",
-          subject: "Science",
-          grade: 9,
-          area: "Science",
-          description: "Understanding basic chemical reactions",
-          dateAdded: "2024-02-27",
-          downloads: 345,
-          rating: 4.6,
-          author: "Teacher Jose Reyes",
-        },
-
-        // Filipino Materials
-        {
-          id: 19,
-          title: "Alpabetong Filipino",
-          type: "Module",
-          subject: "Filipino",
-          grade: 1,
-          area: "Filipino",
-          description: "Learning the Filipino alphabet",
-          dateAdded: "2024-02-26",
-          downloads: 198,
-          rating: 4.8,
-          author: "Teacher Sarah Johnson",
-        },
-        {
-          id: 20,
-          title: "Pangngalan",
-          type: "Lesson Exemplar",
-          subject: "Filipino",
-          grade: 2,
-          area: "Filipino",
-          description: "Understanding Filipino nouns",
-          dateAdded: "2024-02-25",
-          downloads: 234,
-          rating: 4.7,
-          author: "Teacher Michael Brown",
-        },
-        {
-          id: 21,
-          title: "Pandiwa",
-          type: "Module",
-          subject: "Filipino",
-          grade: 3,
-          area: "Filipino",
-          description: "Learning Filipino verbs",
-          dateAdded: "2024-02-24",
-          downloads: 287,
-          rating: 4.6,
-          author: "Teacher Lisa Chen",
-        },
-        {
-          id: 22,
-          title: "Pang-uri",
-          type: "Activity Guide",
-          subject: "Filipino",
-          grade: 4,
-          area: "Filipino",
-          description: "Understanding Filipino adjectives",
-          dateAdded: "2024-02-23",
-          downloads: 156,
-          rating: 4.9,
-          author: "Teacher David Wilson",
-        },
-        {
-          id: 23,
-          title: "Tula at Awit",
-          type: "Module",
-          subject: "Filipino",
-          grade: 6,
-          area: "Filipino",
-          description: "Introduction to Filipino poetry",
-          dateAdded: "2024-02-22",
-          downloads: 345,
-          rating: 4.7,
-          author: "Teacher Emily Parker",
-        },
-        {
-          id: 24,
-          title: "Maikling Kwento",
-          type: "Lesson Exemplar",
-          subject: "Filipino",
-          grade: 8,
-          area: "Filipino",
-          description: "Analyzing Filipino short stories",
-          dateAdded: "2024-02-21",
-          downloads: 289,
-          rating: 4.8,
-          author: "Teacher Robert Smith",
-        },
-
-        // Araling Panlipunan Materials
-        {
-          id: 25,
-          title: "Pamilya at Paaralan",
-          type: "Module",
-          subject: "Araling Panlipunan",
-          grade: 1,
-          area: "Araling Panlipunan",
-          description: "Understanding family and school community",
-          dateAdded: "2024-02-20",
-          downloads: 267,
-          rating: 4.6,
-          author: "Teacher Maria Santos",
-        },
-        {
-          id: 26,
-          title: "Pamayanan",
-          type: "Lesson Exemplar",
-          subject: "Araling Panlipunan",
-          grade: 2,
-          area: "Araling Panlipunan",
-          description: "Learning about community roles and responsibilities",
-          dateAdded: "2024-02-19",
-          downloads: 198,
-          rating: 4.7,
-          author: "Teacher John Cruz",
-        },
-        {
-          id: 27,
-          title: "Pilipinas: Ating Bansa",
-          type: "Activity Guide",
-          subject: "Araling Panlipunan",
-          grade: 4,
-          area: "Araling Panlipunan",
-          description: "Introduction to Philippine geography and culture",
-          dateAdded: "2024-02-18",
-          downloads: 234,
-          rating: 4.5,
-          author: "Teacher Ana Reyes",
-        },
-        {
-          id: 28,
-          title: "Kasaysayan ng Pilipinas",
-          type: "Module",
-          subject: "Araling Panlipunan",
-          grade: 6,
-          area: "Araling Panlipunan",
-          description: "Overview of Philippine history",
-          dateAdded: "2024-02-17",
-          downloads: 312,
-          rating: 4.8,
-          author: "Teacher Pedro Santos",
-        },
-        {
-          id: 29,
-          title: "Globalisasyon",
-          type: "Lesson Exemplar",
-          subject: "Araling Panlipunan",
-          grade: 8,
-          area: "Araling Panlipunan",
-          description: "Understanding globalization and its effects",
-          dateAdded: "2024-02-16",
-          downloads: 278,
-          rating: 4.7,
-          author: "Teacher Maria Garcia",
-        },
-        {
-          id: 30,
-          title: "Ekonomiks",
-          type: "Module",
-          subject: "Araling Panlipunan",
-          grade: 10,
-          area: "Araling Panlipunan",
-          description: "Basic economic concepts and principles",
-          dateAdded: "2024-02-15",
-          downloads: 345,
-          rating: 4.6,
-          author: "Teacher Jose Reyes",
-        },
-
-        // MAPEH Materials
-        {
-          id: 31,
-          title: "Basic Rhythms",
-          type: "Module",
-          subject: "MAPEH",
-          grade: 1,
-          area: "MAPEH",
-          description: "Introduction to basic musical rhythms",
-          dateAdded: "2024-02-14",
-          downloads: 198,
-          rating: 4.8,
-          author: "Teacher Sarah Johnson",
-        },
-        {
-          id: 32,
-          title: "Health Habits",
-          type: "Lesson Exemplar",
-          subject: "MAPEH",
-          grade: 2,
-          area: "MAPEH",
-          description: "Developing healthy habits and practices",
-          dateAdded: "2024-02-13",
-          downloads: 234,
-          rating: 4.7,
-          author: "Teacher Michael Brown",
-        },
-        {
-          id: 33,
-          title: "Sports Skills",
-          type: "Activity Guide",
-          subject: "MAPEH",
-          grade: 4,
-          area: "MAPEH",
-          description: "Basic sports and physical activities",
-          dateAdded: "2024-02-12",
-          downloads: 287,
-          rating: 4.6,
-          author: "Teacher Lisa Chen",
-        },
-        {
-          id: 34,
-          title: "Art Elements",
-          type: "Module",
-          subject: "MAPEH",
-          grade: 6,
-          area: "MAPEH",
-          description: "Understanding elements of art",
-          dateAdded: "2024-02-11",
-          downloads: 156,
-          rating: 4.9,
-          author: "Teacher David Wilson",
-        },
-        {
-          id: 35,
-          title: "Music Theory",
-          type: "Lesson Exemplar",
-          subject: "MAPEH",
-          grade: 8,
-          area: "MAPEH",
-          description: "Basic music theory and composition",
-          dateAdded: "2024-02-10",
-          downloads: 345,
-          rating: 4.7,
-          author: "Teacher Emily Parker",
-        },
-        {
-          id: 36,
-          title: "Contemporary Arts",
-          type: "Module",
-          subject: "MAPEH",
-          grade: 10,
-          area: "MAPEH",
-          description: "Exploring modern art forms and expressions",
-          dateAdded: "2024-02-09",
-          downloads: 289,
-          rating: 4.8,
-          author: "Teacher Robert Smith",
-        },
-
-        // EPP Materials for Grade 4
-        {
-          id: 37,
-          title: "Basic Computer Operations",
-          type: "Module",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 4,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "ICT",
-          description:
-            "Introduction to basic computer operations and keyboarding skills",
-          dateAdded: "2024-02-08",
-          downloads: 267,
-          rating: 4.6,
-          author: "Teacher Maria Santos",
-        },
-        {
-          id: 38,
-          title: "Simple Home Repairs",
-          type: "Lesson Exemplar",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 4,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Industrial Arts",
-          description: "Basic home maintenance and repair skills",
-          dateAdded: "2024-02-07",
-          downloads: 198,
-          rating: 4.7,
-          author: "Teacher John Cruz",
-        },
-        {
-          id: 39,
-          title: "Basic Cooking Skills",
-          type: "Activity Guide",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 4,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Home Economics",
-          description: "Introduction to basic cooking and kitchen safety",
-          dateAdded: "2024-02-06",
-          downloads: 234,
-          rating: 4.5,
-          author: "Teacher Ana Reyes",
-        },
-
-        // EPP Materials for Grade 5
-        {
-          id: 40,
-          title: "Word Processing Basics",
-          type: "Module",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 5,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "ICT",
-          description: "Learning basic word processing and document creation",
-          dateAdded: "2024-02-05",
-          downloads: 312,
-          rating: 4.8,
-          author: "Teacher Pedro Santos",
-        },
-        {
-          id: 41,
-          title: "Simple Woodworking",
-          type: "Lesson Exemplar",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 5,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Industrial Arts",
-          description: "Introduction to basic woodworking tools and techniques",
-          dateAdded: "2024-02-04",
-          downloads: 278,
-          rating: 4.7,
-          author: "Teacher Maria Garcia",
-        },
-        {
-          id: 42,
-          title: "Home Management",
-          type: "Activity Guide",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 5,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Home Economics",
-          description: "Basic home management and organization skills",
-          dateAdded: "2024-02-03",
-          downloads: 345,
-          rating: 4.6,
-          author: "Teacher Jose Reyes",
-        },
-        {
-          id: 43,
-          title: "Simple Business Concepts",
-          type: "Module",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 5,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Entrepreneurship",
-          description:
-            "Introduction to basic business concepts and money management",
-          dateAdded: "2024-02-02",
-          downloads: 198,
-          rating: 4.8,
-          author: "Teacher Sarah Johnson",
-        },
-
-        // EPP Materials for Grade 6
-        {
-          id: 44,
-          title: "Spreadsheet Basics",
-          type: "Module",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 6,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "ICT",
-          description:
-            "Learning basic spreadsheet operations and data management",
-          dateAdded: "2024-02-01",
-          downloads: 234,
-          rating: 4.7,
-          author: "Teacher Michael Brown",
-        },
-        {
-          id: 45,
-          title: "Basic Electronics",
-          type: "Lesson Exemplar",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 6,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Industrial Arts",
-          description: "Introduction to basic electronics and simple circuits",
-          dateAdded: "2024-01-31",
-          downloads: 287,
-          rating: 4.6,
-          author: "Teacher Lisa Chen",
-        },
-        {
-          id: 46,
-          title: "Advanced Cooking",
-          type: "Activity Guide",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 6,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Home Economics",
-          description: "Advanced cooking techniques and meal planning",
-          dateAdded: "2024-01-30",
-          downloads: 156,
-          rating: 4.9,
-          author: "Teacher David Wilson",
-        },
-        {
-          id: 47,
-          title: "Business Planning",
-          type: "Module",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 6,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "Entrepreneurship",
-          description:
-            "Creating simple business plans and marketing strategies",
-          dateAdded: "2024-01-29",
-          downloads: 345,
-          rating: 4.7,
-          author: "Teacher Emily Parker",
-        },
-        {
-          id: 48,
-          title: "Basic Agriculture",
-          type: "Lesson Exemplar",
-          subject: "Edukasyong Pangtahanan at Pangkabuhayan",
-          grade: 6,
-          area: "Edukasyong Pangtahanan at Pangkabuhayan",
-          component: "AFA",
-          description: "Introduction to basic agriculture and plant care",
-          dateAdded: "2024-01-28",
-          downloads: 289,
-          rating: 4.8,
-          author: "Teacher Robert Smith",
-        },
-        {
-          id: "math-activity-11",
-          title: "Basic Addition",
-          type: "Activity Guide",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Introduction to addition with numbers 1-10.",
-          dateAdded: "2024-04-20",
-          downloads: 150,
-          rating: 4.5,
-          author: "Teacher Maria Santos",
-          thumbnail:
-            "https://images.pexels.com/photos/1234582/pexels-photo-1234582.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-module-11",
-          title: "Number Patterns",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Understanding number sequences and patterns.",
-          dateAdded: "2024-04-21",
-          downloads: 200,
-          rating: 4.6,
-          author: "Teacher John Cruz",
-          thumbnail:
-            "https://images.pexels.com/photos/1234583/pexels-photo-1234583.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-activity-12",
-          title: "Shapes and Space",
-          type: "Activity Guide",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Basic geometric shapes and spatial concepts.",
-          dateAdded: "2024-04-22",
-          downloads: 180,
-          rating: 4.7,
-          author: "Teacher Ana Reyes",
-          thumbnail:
-            "https://images.pexels.com/photos/1234584/pexels-photo-1234584.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-module-12",
-          title: "Counting to 50",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Fun activities to help students count to 50.",
-          dateAdded: "2024-04-23",
-          downloads: 220,
-          rating: 4.8,
-          author: "Teacher Sarah Johnson",
-          thumbnail:
-            "https://images.pexels.com/photos/1234585/pexels-photo-1234585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-activity-13",
-          title: "Introduction to Subtraction",
-          type: "Activity Guide",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Basic subtraction concepts using visual aids.",
-          dateAdded: "2024-04-24",
-          downloads: 160,
-          rating: 4.5,
-          author: "Teacher Michael Green",
-          thumbnail:
-            "https://images.pexels.com/photos/1234586/pexels-photo-1234586.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-module-13",
-          title: "Understanding Money",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Learning about coins and their values.",
-          dateAdded: "2024-04-25",
-          downloads: 190,
-          rating: 4.6,
-          author: "Teacher Lisa Chen",
-          thumbnail:
-            "https://images.pexels.com/photos/1234587/pexels-photo-1234587.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-activity-14",
-          title: "Measurement Basics",
-          type: "Activity Guide",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description:
-            "Introduction to measuring length using non-standard units.",
-          dateAdded: "2024-04-26",
-          downloads: 170,
-          rating: 4.7,
-          author: "Teacher John Doe",
-          thumbnail:
-            "https://images.pexels.com/photos/1234588/pexels-photo-1234588.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-module-14",
-          title: "Exploring Time",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Understanding clocks and telling time.",
-          dateAdded: "2024-04-27",
-          downloads: 240,
-          rating: 4.8,
-          author: "Teacher Sarah Blue",
-          thumbnail:
-            "https://images.pexels.com/photos/1234589/pexels-photo-1234589.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-activity-15",
-          title: "Fun with Fractions",
-          type: "Activity Guide",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "Introduction to basic fractions using visual aids.",
-          dateAdded: "2024-04-28",
-          downloads: 150,
-          rating: 4.6,
-          author: "Teacher Emily White",
-          thumbnail:
-            "https://images.pexels.com/photos/1234590/pexels-photo-1234590.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "math-module-15",
-          title: "Math Games",
-          type: "Module",
-          subject: "Mathematics",
-          grade: 1,
-          area: "Mathematics",
-          description: "A collection of fun math games for young learners.",
-          dateAdded: "2024-04-29",
-          downloads: 300,
-          rating: 4.9,
-          author: "Teacher Michael Red",
-          thumbnail:
-            "https://images.pexels.com/photos/1234591/pexels-photo-1234591.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        },
-        {
-          id: "shs-core-1",
-          title: "Oral Communication Skills Enhancement",
-          type: "Module",
-          subject: "Oral Communication", // Matches a core subject
-          grade: 11,
-          coreSubject: "Oral Communication",
-          description: "Advanced techniques for public speaking.",
-          dateAdded: "2024-05-01",
-          downloads: 120,
-          rating: 4.8,
-          author: "Dr. Jane Doe",
-        },
-        {
-          id: "shs-track-abm-1",
-          title: "Business Ethics and Social Responsibility",
-          type: "Lesson Exemplar",
-          subject: "Business Ethics", // Example specialized subject
-          grade: 12,
-          track: "Academic Track",
-          subTrack: "Accountancy, Business and Management (ABM)", // Matches an academic track
-          specializedSubject: "Business Ethics and Social Responsibility", // Example, could be more specific
-          description: "Case studies in business ethics.",
-          dateAdded: "2024-05-02",
-          downloads: 90,
-          rating: 4.7,
-          author: "Prof. John Smith",
-        },
-        {
-          id: "shs-applied-1",
-          title: "Practical Research 1: Qualitative Research",
-          type: "Module",
-          subject: "Practical Research 1", // Matches an applied subject
-          grade: 11,
-          appliedSubject: "Practical Research 1",
-          description: "Step-by-step guide to qualitative research methods.",
-          dateAdded: "2024-05-03",
-          downloads: 150,
-          rating: 4.9,
-          author: "Dr. Emily White",
-        },
-        {
-          id: "shs-tvl-ict-1",
-          title: "Introduction to Java Programming",
-          type: "Module",
-          subject: "Java Programming", // Example specialized for TVL-ICT
-          grade: 12,
-          track: "TVL Track",
-          subTrack: "Information and Communications Technology (ICT)",
-          specializedSubject: "Java Programming Fundamentals",
-          description: "Basics of Java programming for TVL students.",
-          dateAdded: "2024-05-04",
-          downloads: 110,
-          rating: 4.6,
-          author: "Mr. Robert Black",
-        },
-      ];
-      setMaterials(mockMaterials);
+      setIsLoading(true); // Start loading
+      try {
+        const response = await getAllMaterials();
+        // Assuming the API returns an object like { success: true, data: [...] }
+        if (response.success) {
+          console.log("API Response (getAllMaterials):", response); // Corrected: use comma instead of period
+          setMaterials(response.data); // Update materials state with fetched data
+        } else {
+          console.error("Failed to fetch materials:", response.message);
+          // Optionally set an error state here
+        }
+      } catch (error) {
+        console.error("Error fetching materials:", error);
+        // Optionally set an error state here
+      } finally {
+        setIsLoading(false); // End loading
+      }
     };
 
     fetchMaterials();
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   const filteredMaterials = materials.filter((material) => {
+    // Check if the material object itself is valid
+    if (!material) return false;
+
     const matchesSearch =
-      material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      material.description.toLowerCase().includes(searchTerm.toLowerCase());
+      !searchTerm || // If no search term, search matches
+      (material.title &&
+        material.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (material.description &&
+        material.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // Resource Type Filter
+    // If search term is active and doesn't match, return false immediately
+    if (searchTerm && !matchesSearch) return false;
+
+    // Resource Type Filter - Use typeName from API response
     const matchesResourceType =
-      !selectedResourceType || material.type === selectedResourceType;
-    if (!matchesResourceType) return false; // Early exit if type doesn't match
+      !selectedResourceType ||
+      (material.typeName && material.typeName === selectedResourceType);
+    if (!matchesResourceType) return false; // If resource type filter is active and doesn't match, return false
 
-    // Grade and Category Filtering
+    // Grade and Category Filtering - Use gradeLevelName from API response
     let matchesGradeCriteria = true;
-    if (selectedCategory) {
+    const materialGradeName = material.gradeLevelName;
+
+    // Apply grade/category filters only if a category or specific grade is selected.
+    // If NO category or specific grade is selected, all materials pass this criteria.
+    if (selectedCategory || selectedGrade) {
+      let materialGrade = null;
+      if (materialGradeName) {
+        const gradeNum = parseInt(materialGradeName.replace("Grade ", ""));
+        if (!isNaN(gradeNum)) materialGrade = gradeNum;
+      }
+
+      // If a category is selected, check if the material's grade falls within that category's range
       if (selectedCategory === "elementary") {
-        matchesGradeCriteria = material.grade >= 1 && material.grade <= 6;
+        matchesGradeCriteria =
+          materialGrade !== null && materialGrade >= 1 && materialGrade <= 6;
       } else if (selectedCategory === "jhs") {
-        matchesGradeCriteria = material.grade >= 7 && material.grade <= 10;
+        matchesGradeCriteria =
+          materialGrade !== null && materialGrade >= 7 && materialGrade <= 10;
       } else if (selectedCategory === "shs") {
-        matchesGradeCriteria = material.grade >= 11 && material.grade <= 12;
+        matchesGradeCriteria =
+          materialGrade !== null && materialGrade >= 11 && materialGrade <= 12;
       }
-      // If a specific grade is also selected, it must match within the category
-      if (selectedGrade && matchesGradeCriteria) {
-        matchesGradeCriteria = material.grade === parseInt(selectedGrade);
+
+      // If a specific grade is selected (and potentially a category), check if the material's grade matches the specific grade
+      if (selectedGrade) {
+        // If a category is also selected, the material must match both the category range and the specific grade
+        if (selectedCategory) {
+          matchesGradeCriteria =
+            matchesGradeCriteria &&
+            materialGrade !== null &&
+            materialGrade === parseInt(selectedGrade);
+        } else {
+          // If only a specific grade is selected without a category
+          matchesGradeCriteria =
+            materialGrade !== null && materialGrade === parseInt(selectedGrade);
+        }
       }
-    } else if (selectedGrade) {
-      // Only specific grade is selected (no category)
-      matchesGradeCriteria = material.grade === parseInt(selectedGrade);
-    } // If neither selectedCategory nor selectedGrade, all grades pass this stage
 
-    if (!matchesGradeCriteria) return false;
+      // If a category or specific grade is selected but doesn't match the material's grade, return false
+      if (!matchesGradeCriteria) return false;
+    }
 
-    // JHS/SHS Specific Filters - Applied based on the material's actual grade
-    if (material.grade >= 1 && material.grade <= 10) {
-      const matchesArea = !selectedArea || material.area === selectedArea;
+    // JHS/SHS Specific Filters - Applied based on the material's actual grade category
+    // Determine the material's grade category based on gradeLevelName
+    let materialCategory = null;
+    if (materialGradeName) {
+      const gradeNum = parseInt(materialGradeName.replace("Grade ", ""));
+      if (!isNaN(gradeNum)) {
+        if (gradeNum >= 1 && gradeNum <= 6) materialCategory = "elementary";
+        else if (gradeNum >= 7 && gradeNum <= 10) materialCategory = "jhs";
+        else if (gradeNum >= 11 && gradeNum <= 12) materialCategory = "shs";
+      }
+    }
+
+    // Apply JHS/Elementary specific filters only if the material is in JHS/Elementary category
+    if (selectedArea || selectedComponent) {
+      if (materialCategory !== "elementary" && materialCategory !== "jhs")
+        return false; // Filter out if not in the correct category
+
+      const matchesArea =
+        !selectedArea ||
+        (material.learningAreaName &&
+          material.learningAreaName === selectedArea);
       const matchesComponent =
-        !selectedComponent || material.component === selectedComponent;
-      return matchesSearch && matchesArea && matchesComponent;
-    } else if (material.grade >= 11 && material.grade <= 12) {
+        !selectedComponent ||
+        (material.componentName &&
+          material.componentName === selectedComponent);
+
+      // If any JHS/Elementary filter is active and doesn't match, return false
+      if (
+        (selectedArea && !matchesArea) ||
+        (selectedComponent && !matchesComponent)
+      )
+        return false;
+    }
+
+    // Apply SHS specific filters only if the material is in SHS category
+    if (
+      selectedCoreSubject ||
+      selectedTrack ||
+      selectedSubTrack ||
+      selectedAppliedSubject ||
+      selectedSpecializedSubject
+    ) {
+      if (materialCategory !== "shs") return false; // Filter out if not in the correct category
+
+      // Note: The API response uses subjectTypeName for what was core/applied/specialized in mock data.
+      // You may need to adjust these comparisons based on the actual values in subjectTypeName.
       const matchesCoreSubject =
-        !selectedCoreSubject || material.coreSubject === selectedCoreSubject;
-      const matchesTrack = !selectedTrack || material.track === selectedTrack;
+        !selectedCoreSubject ||
+        (material.subjectTypeName &&
+          material.subjectTypeName === selectedCoreSubject); // Using subjectTypeName
+      const matchesTrack =
+        !selectedTrack ||
+        (material.trackName && material.trackName === selectedTrack); // Using trackName
       const matchesSubTrack =
-        !selectedSubTrack || material.subTrack === selectedSubTrack;
+        !selectedSubTrack ||
+        (material.strandName && material.strandName === selectedSubTrack); // Using strandName for sub-track
       const matchesAppliedSubject =
         !selectedAppliedSubject ||
-        material.appliedSubject === selectedAppliedSubject;
+        (material.subjectTypeName &&
+          material.subjectTypeName === selectedAppliedSubject); // Using subjectTypeName
       const matchesSpecializedSubject =
         !selectedSpecializedSubject ||
-        material.specializedSubject === selectedSpecializedSubject;
-      return (
-        matchesSearch &&
-        matchesCoreSubject &&
-        matchesTrack &&
-        matchesSubTrack &&
-        matchesAppliedSubject &&
-        matchesSpecializedSubject
-      );
+        (material.subjectTypeName &&
+          material.subjectTypeName === selectedSpecializedSubject); // Using subjectTypeName
+
+      // If any SHS filter is active and doesn't match, return false
+      if (
+        (selectedCoreSubject && !matchesCoreSubject) ||
+        (selectedTrack && !matchesTrack) ||
+        (selectedSubTrack && !matchesSubTrack) ||
+        (selectedAppliedSubject && !matchesAppliedSubject) ||
+        (selectedSpecializedSubject && !matchesSpecializedSubject)
+      )
+        return false;
     }
-    // Should ideally not be reached if material.grade is always within 1-12
-    // but as a fallback, if it's outside these, it only matches search term.
-    return matchesSearch;
+
+    // If all active filters are matched (or no filters were active), return true
+    return true;
   });
 
   const handleGradeChange = (grade) => {
@@ -1162,6 +376,7 @@ const Materials = () => {
 
   const handleDelete = (id) => {
     // Logic to delete the material by id
+    // This will need to be updated to call a backend API for deletion
     setMaterials((prevMaterials) =>
       prevMaterials.filter((material) => material.id !== id)
     );
@@ -1536,8 +751,10 @@ const Materials = () => {
         )}
 
         {/* Scrollable Container for Materials Grid - Made responsive and scrollbar hidden on desktop */}
-        <div className="md:overflow-y-auto md:max-h-[40rem] md:[&::-webkit-scrollbar]:hidden md:[scrollbar-width:none] md:[-ms-overflow-style:none]">
-          {filteredMaterials.length > 0 ? (
+        <div className="md:overflow-y-auto md:max-h-[40rem] md:[&::-webkit-scrollbar]:hidden md:[scrollbar-width:none] md:[&::-webkit-scrollbar]:hidden md:[scrollbar-width:none] md:[-ms-overflow-style:none]">
+          {isLoading ? (
+            <div className="text-center py-8">Loading materials...</div> // Loading indicator
+          ) : filteredMaterials.length > 0 ? (
             <div
               className={`grid ${
                 viewType === "list"
@@ -1568,18 +785,23 @@ const Materials = () => {
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-x-2">
                         <span>
                           <span className="font-semibold">Grade:</span>{" "}
-                          {material.grade}
+                          {material.gradeLevelName || "Not Specified"}
                         </span>
                         <span>|</span>
                         <span>
-                          {material.coreSubject ||
-                            material.appliedSubject ||
-                            material.track ||
-                            material.area ||
+                          {material.subjectTypeName ||
+                            material.trackName ||
+                            material.strandName ||
+                            material.learningAreaName ||
+                            material.componentName ||
                             material.subject ||
                             "N/A"}
                         </span>
                       </div>
+                    </div>
+                    {/* Add Resource Type here */}
+                    <div className="ml-2 sm:ml-4 flex-shrink-0 text-xs text-gray-600 dark:text-gray-300">
+                      {material.typeName || "N/A"}
                     </div>
                     <div className="ml-2 sm:ml-4 flex space-x-1 sm:space-x-2 flex-shrink-0">
                       <div

@@ -4,61 +4,97 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaFilter, FaTimes } from "react-icons/fa";
 import MaterialCard from "../components/MaterialCard";
-import learningAreas from "../data/learningAreas";
-import materials from "../data/materials";
+import { getAllMaterials } from "../../services/lrms-endpoints";
 
 const MaterialsPage = () => {
   const { subjectId } = useParams();
+  const [allMaterials, setAllMaterials] = useState([]);
   const [filteredMaterials, setFilteredMaterials] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewType, setViewType] = useState("card");
 
-  const subject = learningAreas.find((area) => area.id === subjectId);
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getAllMaterials();
+        if (response.success) {
+          setAllMaterials(response.data);
+        } else {
+          console.error("Failed to fetch materials:", response.message);
+        }
+      } catch (error) {
+        console.error("Error fetching materials:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMaterials();
+  }, []);
 
   useEffect(() => {
-    // Simulate loading
-    setIsLoading(true);
-
-    const timer = setTimeout(() => {
-      filterMaterials(selectedCategory);
-      setIsLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, [subjectId, selectedCategory]);
+    filterMaterials(selectedCategory);
+  }, [allMaterials, subjectId, selectedCategory]);
 
   const filterMaterials = (category) => {
-    let filtered = materials.filter(
-      (material) => material.subject === subjectId
+    // Filter by subjectId first (using learningAreaName from API response)
+    let filtered = allMaterials.filter(
+      (material) => material.learningAreaName === subjectId // Assuming subjectId from URL matches learningAreaName
     );
 
     if (category !== "All") {
-      filtered = filtered.filter((material) => material.type === category);
+      // Filter by category (using typeName from API response)
+      filtered = filtered.filter((material) => material.typeName === category);
     }
 
     setFilteredMaterials(filtered);
   };
 
+  // Dynamically generate material types based on filtered materials for the current subject
   const materialTypes = [
     "All",
     ...new Set(
-      materials.filter((m) => m.subject === subjectId).map((m) => m.type)
+      allMaterials // Use allMaterials to get a comprehensive list of types for the subject
+        .filter((material) => material.learningAreaName === subjectId) // Filter by current subject
+        .map((m) => m.typeName)
+        .filter(Boolean) // Filter out null or undefined types
     ),
   ];
 
-  if (!subject) {
+  // Determine subject name for the title - use learningAreaName from the first material if available
+  const subjectName =
+    filteredMaterials.length > 0
+      ? filteredMaterials[0].learningAreaName
+      : subjectId; // Fallback to subjectId if no materials found
+
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-          Subject not found
+          Loading Materials...
+        </h2>
+      </div>
+    );
+  }
+
+  if (
+    allMaterials.length > 0 &&
+    filteredMaterials.length === 0 &&
+    subjectId &&
+    !allMaterials.some((material) => material.learningAreaName === subjectId)
+  ) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+          Subject not found or no materials available
         </h2>
         <Link
-          to="/"
+          to="/materials"
           className="text-primary-600 hover:text-primary-700 font-medium"
         >
-          Return to Dashboard
+          Return to All Materials
         </Link>
       </div>
     );
@@ -77,7 +113,7 @@ const MaterialsPage = () => {
               <FaArrowLeft size={18} />
             </Link>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-              {subject.name} Materials
+              {subjectName} Materials
             </h1>
             <div className="ml-4 flex space-x-2">
               <button
@@ -199,7 +235,7 @@ const MaterialsPage = () => {
           </h3>
           <p className="text-gray-600 dark:text-gray-300">
             No {selectedCategory !== "All" ? selectedCategory : ""} materials
-            available for {subject.name}.
+            available for {subjectName}.
           </p>
         </div>
       ) : (
