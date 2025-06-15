@@ -1,3 +1,4 @@
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import {
@@ -9,10 +10,15 @@ import {
   NotFound,
   AboutUs,
   UsersManagement,
+  MaterialsManagement,
 } from "./pages";
 import { ThemeProvider } from "./context/ThemeContext";
 // import { useStateContext } from "./contexts/ContextProvider";
 import RequireAuth from "./contexts/RequireAuth";
+import Modal from "react-modal";
+
+// Set the app element for accessibility
+Modal.setAppElement("#root");
 
 function App() {
   const roles = ["ADMIN", "USER", "LEARNER", "TEACHER"];
@@ -32,6 +38,10 @@ function App() {
             <Route path="/security" element={<Security />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/users-management" element={<UsersManagement />} />
+            <Route
+              path="/materials/management"
+              element={<MaterialsManagement />}
+            />
             <Route index element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Route>

@@ -6,3 +6,4 @@ export { default as Profile } from "../pages/Administration Page/Profile";
 export { default as NotFound } from "../pages/Administration Page/NotFound";
 export { default as AboutUs } from "../pages/Administration Page/AboutUs";
 export { default as UsersManagement } from "../pages/Administration Page/UsersManagement";
+export { default as MaterialsManagement } from "../pages/Administration Page/Management/MaterialsManagement";

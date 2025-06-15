@@ -20,8 +20,10 @@
     "react-datepicker": "^8.3.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.0.1",
+    "react-modal": "^3.16.3",
     "react-router-dom": "^6.22.3",
     "recharts": "^2.10.4",
+    "sweetalert2": "^11.22.0",
     "xlsx": "^0.18.5",
     "yup": "^1.6.1"
   },

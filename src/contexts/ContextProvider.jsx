@@ -43,7 +43,7 @@ export function ContextProvider({ children }) {
     ]
   );
 
-  console.log(newTicketsCount);
+  // console.log(newTicketsCount);
 
   return (
     <StateContext.Provider value={contextValue}>

@@ -48,7 +48,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         },
         {
           name: "Materials Management",
-          path: "/admin/materials",
+          path: "/materials/management",
           icon: FaFileAlt,
         },
         {

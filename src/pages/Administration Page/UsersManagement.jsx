@@ -155,7 +155,7 @@ const UsersManagement = () => {
         delete updatedData.userId;
 
         const response = await userService.updateProfile(userId, updatedData);
-        console.log("User profile updated successfully:", response);
+        // console.log("User profile updated successfully:", response);
         fetchUsers(); // Refresh the list after successful update
         closeEditModal(); // Close the edit modal
         setShowUpdateSuccess(true); // Show update success snackbar
@@ -194,7 +194,7 @@ const UsersManagement = () => {
     try {
       setIsResettingPassword(true); // Set loading to true
       await userService.resetPassword(userToReset.email, newPassword);
-      console.log("Password reset successfully for user:", userToReset.email);
+      // console.log("Password reset successfully for user:", userToReset.email);
       closeAdminResetModal();
       setShowAdminResetSuccess(true);
       setTimeout(() => {

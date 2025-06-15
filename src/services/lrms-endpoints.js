@@ -2,7 +2,8 @@
 import axios from "axios";
 
 const customError = new Error("Network error or no response");
-const BASE_URL = "http://localhost:5001";
+// const BASE_URL = "http://localhost:5001";
+const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
 
 // Function to upload material metadata (Excel file)
 export const uploadMaterialsMetadata = async (excelFile) => {
@@ -57,4 +58,18 @@ export const getAllMaterials = async () => {
     console.error("Error fetching materials:", error);
     throw error.response?.data || customError;
   }
+};
+
+// View a material file
+export const viewMaterialFile = (materialId, title) => {
+  const encodedTitle = encodeURIComponent(title || "");
+  return `${BASE_URL}/lrms/view-material/${materialId}?title=${encodedTitle}`;
+};
+
+// Get material details
+export const getMaterialDetails = async (materialId) => {
+  const response = await axios.get(
+    `${BASE_URL}/lrms/get-material/${materialId}`
+  );
+  return response.data;
 };
