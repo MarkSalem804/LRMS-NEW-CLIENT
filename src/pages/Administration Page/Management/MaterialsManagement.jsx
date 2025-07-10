@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import {
   FaSearch,
@@ -6,9 +7,10 @@ import {
   FaTrash,
   FaUpload,
   FaFileExcel,
+  FaDatabase,
   FaEye,
-  FaTimes,
-  FaDownload,
+  // FaTimes,
+  // FaDownload,
 } from "react-icons/fa";
 import {
   getAllMaterials,
@@ -100,10 +102,14 @@ const MaterialsManagement = () => {
 
     // Grade filtering
     if (selectedGrade) {
-      const materialGrade = parseInt(
-        material.gradeLevelName?.replace("Grade ", "")
-      );
-      if (materialGrade !== parseInt(selectedGrade)) return false;
+      if (selectedGrade === "Kindergarten") {
+        if (material.gradeLevelName !== "Kindergarten") return false;
+      } else {
+        const materialGrade = parseInt(
+          material.gradeLevelName?.replace("Grade ", "")
+        );
+        if (materialGrade !== parseInt(selectedGrade)) return false;
+      }
     }
 
     // Learning Area filtering
@@ -510,9 +516,11 @@ const MaterialsManagement = () => {
   }, [viewMaterialUrl]);
 
   return (
-    <div className="p-4 md:p-6">
+    <div>
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-        Materials Management
+        <span className="flex items-center gap-2">
+          <FaDatabase size={32} /> MATERIALS MANAGEMENT
+        </span>
       </h1>
 
       {/* Search and Filter Bar */}
@@ -561,6 +569,7 @@ const MaterialsManagement = () => {
                 className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="">All Grades</option>
+                <option value="Kindergarten">Kindergarten</option>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
                   <option key={grade} value={grade}>
                     Grade {grade}
@@ -614,9 +623,9 @@ const MaterialsManagement = () => {
       )}
 
       {/* Materials Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-blue-500">
+      <div className="bg-blue-50 text-gray-800 dark:bg-gray-800 dark:text-white rounded-lg shadow overflow-hidden mb-0 border border-blue-500 dark:border-gray-700">
+        <table className="min-w-full divide-y divide-gray-400 dark:divide-gray-700">
+          <thead className="bg-blue-500 dark:bg-blue-700 sticky top-0">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                 Title
@@ -635,7 +644,7 @@ const MaterialsManagement = () => {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-400 dark:divide-gray-700">
             {isLoading ? (
               <tr>
                 <td colSpan="5" className="px-6 py-4 text-center">
@@ -972,42 +981,38 @@ const MaterialsManagement = () => {
         className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999]"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[9998]"
       >
-        <div className="bg-white rounded-xl p-6 w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl relative z-[9999]">
-          {/* Header Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 -mx-6 -mt-6 px-6 pt-6 pb-4 rounded-t-xl">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-semibold text-white mb-1">
-                  {viewMaterialTitle || "View Material"}
-                </h2>
-                <p className="text-sm text-blue-100">
-                  Learning Resource Material
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsViewModalOpen(false);
-                  setViewMaterialUrl(null);
-                  setViewMaterialTitle("");
-                }}
-                className="text-white hover:text-blue-100 transition-colors duration-200 p-2 rounded-full hover:bg-blue-500"
-              >
-                <FaTimes size={24} />
-              </button>
+        <div className="bg-white rounded-xl w-full max-w-4xl h-[80vh] flex flex-col shadow-2xl relative z-[9999] p-0">
+          {/* Modal Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 rounded-t-xl flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1">
+                {viewMaterialTitle || "View Material"}
+              </h2>
+              <p className="text-sm text-blue-100">
+                Learning Resource Material
+              </p>
             </div>
+            <button
+              onClick={() => {
+                setIsViewModalOpen(false);
+                setViewMaterialUrl(null);
+                setViewMaterialTitle("");
+              }}
+              className="text-white hover:text-blue-100 transition-colors duration-200 p-2 rounded-full hover:bg-blue-500"
+              aria-label="Close"
+            >
+              <span className="text-3xl leading-none">&times;</span>
+            </button>
           </div>
-
           {/* Content Section */}
-          <div className="flex-1 relative bg-gray-50 rounded-lg overflow-hidden mt-4">
+          <div className="flex-1 bg-white rounded-b-xl p-6 overflow-hidden">
             {viewMaterialUrl ? (
-              <div className="w-full h-full">
-                <iframe
-                  src={viewMaterialUrl}
-                  title={viewMaterialTitle}
-                  className="w-full h-full border-0"
-                  aria-label={viewMaterialTitle}
-                />
-              </div>
+              <iframe
+                src={viewMaterialUrl}
+                title={viewMaterialTitle}
+                className="w-full h-full border-0 rounded-lg"
+                aria-label={viewMaterialTitle}
+              />
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-500">
                 <div className="text-center">

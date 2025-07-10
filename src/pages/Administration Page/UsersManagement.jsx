@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash, FaEye, FaUser, FaRedo } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import userService from "../../services/user-endpoints";
@@ -281,25 +281,34 @@ const UsersManagement = () => {
         )}
       </AnimatePresence>
       <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-            <FaUser size={32} /> USERS MANAGEMENT
-          </h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-6">
+          <FaUser size={32} /> USERS MANAGEMENT
+        </h1>
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
           <button
-            className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 dark:bg-blue-700 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 shadow transition-colors"
             onClick={openRegisterModal}
           >
             REGISTER
           </button>
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search users..."
+              // You may want to add a search state and handler here
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <FaUser className="absolute left-3 top-3 text-gray-400" />
+          </div>
         </div>
 
         {/* All Users Table */}
         <div className="bg-blue-50 text-gray-800 dark:bg-gray-800 dark:text-white rounded-lg shadow overflow-hidden mb-0 border border-blue-500 dark:border-gray-700">
-          <div className="p-4 bg-blue-100 dark:bg-gray-700 text-center uppercase">
+          {/* <div className="p-4 bg-blue-100 dark:bg-gray-700 text-center uppercase">
             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">
               All Users
             </h2>
-          </div>
+          </div> */}
           <div className="overflow-x-auto h-[550px]">
             <table className="min-w-full divide-y divide-gray-400 dark:divide-gray-700">
               <thead className="bg-blue-500 dark:bg-blue-700 sticky top-0">
@@ -373,25 +382,124 @@ const UsersManagement = () => {
             </table>
           </div>
 
-          <div className="px-6 py-4 flex justify-between items-center bg-gray-50 dark:bg-gray-700">
-            <button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
-            >
-              Next
-            </button>
-          </div>
+          {totalPages > 0 && (
+            <div className="bg-blue-500 px-4 py-3 flex items-center justify-between border-t border-blue-600 sm:px-6">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-white">
+                    Showing{" "}
+                    {allUsers.length === 0
+                      ? 0
+                      : (currentPage - 1) * itemsPerPage + 1}{" "}
+                    to {Math.min(currentPage * itemsPerPage, allUsers.length)}{" "}
+                    of {allUsers.length} results
+                  </p>
+                </div>
+                <div>
+                  <nav
+                    className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                    aria-label="Pagination"
+                  >
+                    {/* First Page Button */}
+                    <button
+                      onClick={() => paginate(1)}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">First</span>
+                      &laquo;
+                    </button>
+                    {/* Previous Page Button */}
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Previous</span>
+                      &lsaquo;
+                    </button>
+                    {/* Page Numbers */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter((page) => {
+                        return (
+                          page === 1 ||
+                          page === totalPages ||
+                          Math.abs(currentPage - page) <= 1
+                        );
+                      })
+                      .map((page, index, array) => {
+                        if (index > 0 && array[index - 1] !== page - 1) {
+                          return (
+                            <React.Fragment key={`ellipsis-${page}`}>
+                              <span className="relative inline-flex items-center px-4 py-2 border border-white bg-blue-500 text-sm font-medium text-white">
+                                ...
+                              </span>
+                              <button
+                                onClick={() => paginate(page)}
+                                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                  currentPage === page
+                                    ? "z-10 bg-white border-white text-blue-500"
+                                    : "bg-blue-500 border-white text-white hover:bg-blue-600"
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            </React.Fragment>
+                          );
+                        }
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => paginate(page)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              currentPage === page
+                                ? "z-10 bg-white border-white text-blue-500"
+                                : "bg-blue-500 border-white text-white hover:bg-blue-600"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
+                    {/* Next Page Button */}
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Next</span>
+                      &rsaquo;
+                    </button>
+                    {/* Last Page Button */}
+                    <button
+                      onClick={() => paginate(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Last</span>
+                      &raquo;
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Currently Logged In Users - Still using static data for now */}

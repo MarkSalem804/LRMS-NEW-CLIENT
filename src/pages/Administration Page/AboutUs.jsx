@@ -25,22 +25,22 @@ const educators = [
     name: "HOMER N. MENDOZA",
     photo: sdsHomer,
     Position: "OIC - Schools Division Superintendent",
-    context:
-      "Ipapakita natin na sa iisang direksyon lang tayo papunta, iba-iba lang ang pacing. Ang mahalaga doon ay alam natin ang prayoridad natin at ang ating patutunguhan.",
+    // context:
+    //   "Ipapakita natin na sa iisang direksyon lang tayo papunta, iba-iba lang ang pacing. Ang mahalaga doon ay alam natin ang prayoridad natin at ang ating patutunguhan.",
   },
   {
     name: "BERNADETTE T. LUNA",
     photo: asdsBernadette,
     Position: "Assistant Schools Division Superintendent",
-    context:
-      "Digital transformation in education is essential for preparing our students for the future. We strive to make learning more interactive and accessible for all.",
+    // context:
+    //   "Digital transformation in education is essential for preparing our students for the future. We strive to make learning more interactive and accessible for all.",
   },
   {
     name: "GLENDA DS. CATADMAN",
     photo: glendaCatadman,
     Position: "Curriculum Implementation Division Chief",
-    context:
-      "Empowering educators and learners with digital tools and resources is a step towards a more inclusive and effective educational system.",
+    // context:
+    //   "Empowering educators and learners with digital tools and resources is a step towards a more inclusive and effective educational system.",
   },
 ];
 
@@ -51,33 +51,26 @@ const proponents = [
     photo: darlferhenImage,
     Position:
       "Senior Education Program Specialist / OIC - Principal (Toclong Elementary School)",
-    context: `"We accept the education we think we deserve,"
+    //     context: `"We accept the education we think we deserve,"
 
-a truth about self-worth and opportunity. Kapag naniniwala tayong kulang ang sarili natin, madali tayong mag-settle sa mababang standards ng pag-aaral o di kaya'y di natin pinipilit na umangat. In other words, our expectations about ourselves shape the doors we knock on, the scholarships na ina-applyan natin, at pati ang ating persistence sa pag-aaral. Kung maliit ang tingin natin sa sarili, maliit din ang ating hinahabol; kung mataas ang paniniwala natin sa sariling kakayahan, mas gagapang tayo para sa de-kalidad na edukasyon.
+    // a truth about self-worth and opportunity. Kapag naniniwala tayong kulang ang sarili natin, madali tayong mag-settle sa mababang standards ng pag-aaral o di kaya'y di natin pinipilit na umangat. In other words, our expectations about ourselves shape the doors we knock on, the scholarships na ina-applyan natin, at pati ang ating persistence sa pag-aaral. Kung maliit ang tingin natin sa sarili, maliit din ang ating hinahabol; kung mataas ang paniniwala natin sa sariling kakayahan, mas gagapang tayo para sa de-kalidad na edukasyon.
 
-- "WE ACCEPT THE EDUCATION WE THINK WE DESERVE."
-Adapted from Stephen Chbosky, The Perks of Being a Wallflower`,
+    // - "WE ACCEPT THE EDUCATION WE THINK WE DESERVE."
+    // Adapted from Stephen Chbosky, The Perks of Being a Wallflower`,
   },
   {
     name: "FLORIDEL R. PESITO",
     photo: floridelImage,
     Position: "Administrative Assistant III",
-    context:
-      "Providing essential administrative support for efficient project implementation.",
+    // context:
+    //   "Providing essential administrative support for efficient project implementation.",
   },
   {
     name: "REDEN M. CRUZADO",
     photo: redenImage,
     Position: "Librarian II",
-    context:
-      "Facilitating access to valuable learning resources and information for users.",
-  },
-  {
-    name: "FELIZ A. TAYAO",
-    photo: felizImage,
-    Position: "Education Program Specialist - Learning Resources",
-    context:
-      "Specializing in developing and curating relevant learning materials.",
+    // context:
+    //   "Facilitating access to valuable learning resources and information for users.",
   },
 ];
 
@@ -86,15 +79,15 @@ const developerTeam = [
     name: "June Bence L. Adelan",
     photo: juneImage,
     position: "Information Technology Officer I",
-    context:
-      "Learning is like playing slot machines - sometimes you take chances, not knowing the outcome, but every spin adds experience, and every loss teaches more than the win. Sensational!!!",
+    // context:
+    //   "Learning is like playing slot machines - sometimes you take chances, not knowing the outcome, but every spin adds experience, and every loss teaches more than the win. Sensational!!!",
   },
   {
     name: "Shaina Montaño",
     photo: shainaImage,
     position: "ICTS Personnel",
-    context:
-      "배움은 K-pop 훈련과 같아서 규율을 요구합니다. 모든 완벽한 성과 뒤에는 반복, 회복력, 그리고 끊임없는 노력의 루틴이 있습니다.",
+    // context:
+    //   "배움은 K-pop 훈련과 같아서 규율을 요구합니다. 모든 완벽한 성과 뒤에는 반복, 회복력, 그리고 끊임없는 노력의 루틴이 있습니다.",
   },
   {
     name: "Mark Joseph V. Salem",

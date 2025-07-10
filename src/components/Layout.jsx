@@ -7,25 +7,22 @@ import Sidebar from "./Sidebar";
 const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen((open) => !open);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      {/* Sidebar is fixed */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      {/* Main content area, with left margin for sidebar */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-200 ease-in-out ${
-          isSidebarOpen ? "ml-64" : "ml-0"
-        }`}
+        className={`ml-0 ${
+          isSidebarOpen ? "lg:ml-64" : ""
+        } transition-all duration-200`}
       >
-        <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900">
-          <Header onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-        </div>
-
-        <main
-          className={`flex-grow overflow-y-auto transition-all duration-200 ease-in-out p-6`}
-        >
+        {/* Sticky header at the top of the window */}
+        <Header onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+        {/* Background and content layering */}
+        <main className="min-h-screen p-6">
           <Outlet />
         </main>
         {/* <Footer /> */}

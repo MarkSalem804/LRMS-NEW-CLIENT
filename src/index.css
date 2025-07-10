@@ -9,10 +9,16 @@
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 700;
+  --chart-text-color: #000000;
+}
+
+.dark:root {
+  --chart-text-color: #ffffff;
 }
 
 html,
 body {
+  font-family: "Poppins", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   @apply font-sans antialiased text-gray-800 bg-gray-50;
   margin: 0;
   padding: 0;
@@ -106,4 +112,10 @@ h6 {
 
 .animate-slide-in {
   animation: slideIn 0.5s ease-out forwards;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 font-poppins;
+  }
 }

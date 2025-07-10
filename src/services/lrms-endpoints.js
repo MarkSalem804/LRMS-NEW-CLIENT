@@ -2,8 +2,8 @@
 import axios from "axios";
 
 const customError = new Error("Network error or no response");
-// const BASE_URL = "http://localhost:5001";
-const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
+const BASE_URL = "http://localhost:5001";
+// const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
 
 // Function to upload material metadata (Excel file)
 export const uploadMaterialsMetadata = async (excelFile) => {

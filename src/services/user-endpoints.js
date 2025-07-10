@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const customError = new Error("Network error or no response");
-// const BASE_URL = "http://localhost:5001";
-const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
+const BASE_URL = "http://localhost:5001";
+// const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
 
 function authenticate(account) {
   return new Promise((resolve, reject) => {
@@ -12,15 +12,44 @@ function authenticate(account) {
         withCredentials: true,
       })
       .then((res) => {
-        resolve(res.data);
+        // If 2FA is required, resolve with that info
+        if (res.data?.data?.requires2FA) {
+          resolve({
+            success: true,
+            requires2FA: true,
+            email: res.data.data.email,
+          });
+        } else {
+          resolve(res.data);
+        }
       })
       .catch((err) => {
         if (err.response) {
-          console.error("[user-endpoints] Error response:", err.response);
           reject(err);
         }
-        console.error("[user-endpoints] Network or unknown error:", err);
         reject(customError);
+      });
+  });
+}
+
+function verifyOtp(email, otpCode) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(
+        `${BASE_URL}/users/verify-otp`,
+        { email, otpCode },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      )
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
       });
   });
 }
@@ -101,6 +130,7 @@ function resetPassword(email, newPassword) {
 
 export default {
   authenticate,
+  verifyOtp,
   getUserProfile,
   getAllUsers,
   registerUser,

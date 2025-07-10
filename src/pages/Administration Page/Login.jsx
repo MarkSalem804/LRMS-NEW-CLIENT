@@ -91,12 +91,22 @@ const Login = () => {
         // Call the authentication service
         const res = await userService.authenticate(values);
 
+        if (res?.requires2FA) {
+          // Redirect to OTP verification page, pass email as state
+          navigate("/verify-otp", { state: { email: values.email } });
+          return;
+        }
+
         if (res?.success) {
           setAuth(res.data.user);
           localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
 
-          // Always navigate to the dashboard after successful login
-          navigate("/dashboard");
+          // Redirect based on user role
+          if (res.data.user.role === "TEACHER") {
+            navigate("/client-page");
+          } else {
+            navigate("/dashboard");
+          }
         } else {
           setToast("Authentication failed");
         }
@@ -216,10 +226,20 @@ const Login = () => {
                   <div className="flex justify-center mt-8 md:mt-10">
                     <Link
                       to="/about-us"
-                      className="inline-block px-40 py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                      className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
                     >
                       About Us
                     </Link>
+                  </div>
+                  <div className="flex justify-center mt-8 md:mt-10">
+                    <a
+                      href="https://wp.depedimuscity.com/?page_id=70"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                    >
+                      Citizen&apos;s Charter
+                    </a>
                   </div>
                 </div>
               </div>
@@ -298,28 +318,6 @@ const Login = () => {
                         )}
                       </button>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <input
-                        id="remember-me"
-                        type="checkbox"
-                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor="remember-me"
-                        className="ml-2 block text-sm text-gray-700"
-                      >
-                        Remember me
-                      </label>
-                    </div>
-                    <Link
-                      to="/forgot-password"
-                      className="text-sm font-medium text-primary-600 hover:text-primary-500"
-                    >
-                      Forgot password?
-                    </Link>
                   </div>
 
                   <motion.button

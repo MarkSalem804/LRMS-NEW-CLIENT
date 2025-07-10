@@ -9,19 +9,22 @@ import {
   FaMapMarkerAlt,
   FaTicketAlt,
 } from "react-icons/fa";
+import BagongPilipinasLogo from "../assets/Bagong-Pilipinas-Logo.png";
+import LogoDepEd1 from "../assets/Logo-DepEd-1.png";
+import DepedLogo from "../assets/deped_logo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white dark:bg-gray-900 shadow-inner py-8">
+    <footer className="bg-black shadow-inner py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            <h3 className="text-base font-semibold text-white mb-2">
               About ILeaRN
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-white mb-2">
               Schools Division Office of Imus City Learning Resource Management
               System (LRMS) Portal named I LeaRN (Imus Learning Resources
               Navigator) supports effective implementation of the Learning
@@ -33,35 +36,33 @@ const Footer = () => {
             </p>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            <h3 className="text-base font-semibold text-white mb-2">
               Quick Links
             </h3>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-2">
               <div>
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                  Offices
-                </h4>
-                <ul className="space-y-2">
+                <h4 className="text-xs font-medium text-white mb-1">Offices</h4>
+                <ul className="space-y-1">
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors block w-full"
+                      href="https://www.deped.gov.ph/"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
                     >
                       Central Office
                     </a>
                   </li>
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors block w-full"
+                      href="https://depedcalabarzon.ph/"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
                     >
                       Region 4A - CALABARZON
                     </a>
                   </li>
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors block w-full"
+                      href="https://depedimuscity.com/"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
                     >
                       Imus City
                     </a>
@@ -69,30 +70,38 @@ const Footer = () => {
                 </ul>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <h4 className="text-xs font-medium text-white mb-1">
                   Resources
                 </h4>
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors block w-full"
+                      href="https://lrmds.deped.gov.ph/"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
                     >
                       LRMDS Portal
                     </a>
                   </li>
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors block w-full"
+                      href="https://lms.deped.gov.ph/"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
                     >
                       LMS Portal
                     </a>
                   </li>
                   <li>
                     <a
-                      href="#"
-                      className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors block w-full"
+                      href="https://www.youtube.com/c/depedetulay"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
+                    >
+                      ETulay
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://training.deped.gov.ph/course/index.php?categoryid=49"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
                     >
                       Commons
                     </a>
@@ -100,7 +109,7 @@ const Footer = () => {
                   <li>
                     <a
                       href="#"
-                      className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors block w-full"
+                      className="text-white hover:text-primary-400 transition-colors block w-full"
                     >
                       ETUlay
                     </a>
@@ -110,22 +119,18 @@ const Footer = () => {
             </div>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            <h3 className="text-base font-semibold text-white mb-2">
               Contact Us
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-2">
               <li className="flex items-start space-x-3">
                 <FaPhone
                   className="text-primary-600 dark:text-primary-400 mt-1"
                   size={16}
                 />
                 <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    Telephone
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    (046) 471-4837
-                  </p>
+                  <p className="text-sm font-medium text-white">Telephone</p>
+                  <p className="text-white">(046) 471-4837</p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
@@ -134,12 +139,8 @@ const Footer = () => {
                   size={16}
                 />
                 <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    Email
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    sdo.imus.city@deped.gov.ph
-                  </p>
+                  <p className="text-sm font-medium text-white">Email</p>
+                  <p className="text-white">sdo.imus.city@deped.gov.ph</p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
@@ -148,10 +149,8 @@ const Footer = () => {
                   size={16}
                 />
                 <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    Address
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-sm font-medium text-white">Address</p>
+                  <p className="text-white">
                     Schools Division Office of Imus City
                     <br />
                     Imus City, Cavite
@@ -161,40 +160,42 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-              Need Help?
+            <h3 className="text-base font-semibold text-white mb-2">
+              Got Feedbacks or Suggestions?
             </h3>
-            <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
-              <div className="flex items-center space-x-3 mb-4">
-                <FaTicketAlt
-                  className="text-primary-600 dark:text-primary-400"
-                  size={24}
-                />
-                <h4 className="text-lg font-medium text-gray-800 dark:text-white">
-                  Submit a Ticket
+            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+              {/* <div className="flex items-center space-x-2 mb-2">
+                <h4 className="text-lg font-medium text-black">
+                  Provide your ides here by clicking the button.
                 </h4>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Having issues or need assistance? Submit a ticket and our
-                support team will help you.
+              </div> */}
+              <p className="text-black mb-2">
+                Provide your ides here by clicking the button.
               </p>
               <a
                 href="https://ticketing.depedimuscity.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors"
+                className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors text-xs"
               >
-                Submit Ticket Now
+                Proceed
               </a>
             </div>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-600 dark:text-gray-300">
-          <p>
+        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4 text-white">
+          <div className="flex items-center gap-4 mb-2 md:mb-0">
+            <img
+              src={BagongPilipinasLogo}
+              alt="Bagong Pilipinas Logo"
+              className="h-10 w-auto"
+            />
+            <img src={LogoDepEd1} alt="DepEd Logo 1" className="h-10 w-auto" />
+            <img src={DepedLogo} alt="DepEd Logo" className="h-10 w-auto" />
+          </div>
+          <p className="text-center md:text-right w-full md:w-auto">
             © April {currentYear} SDOIC - Imus Learning Resource Management
-            System. All rights reserved. Made with{" "}
-            <FaHeart className="inline text-error-500" /> by ICTS - Unit and
-            proposed by LR Unit.
+            System. All rights reserved.
           </p>
         </div>
       </div>

@@ -4,11 +4,12 @@ import {
   FaChevronLeft,
   FaUsers,
   FaFileAlt,
-  FaChartBar,
+  // FaChartBar,
   FaCog,
-  FaDatabase,
-  FaGraduationCap,
-  FaBook,
+  FaHome,
+  // FaDatabase,
+  // FaGraduationCap,
+  // FaBook,
 } from "react-icons/fa";
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -17,23 +18,13 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const categories = [
     {
-      name: "Resource Management",
-      icon: FaGraduationCap,
+      name: "Navigations",
+      icon: FaCog,
       items: [
         {
-          name: "Elementary",
-          path: "/materials?category=elementary",
-          icon: FaGraduationCap,
-        },
-        {
-          name: "Junior High School (JHS)",
-          path: "/materials?category=jhs",
-          icon: FaGraduationCap,
-        },
-        {
-          name: "Senior High School (SHS)",
-          path: "/materials?category=shs",
-          icon: FaGraduationCap,
+          name: "Home Dashboard",
+          path: "/dashboard",
+          icon: FaHome,
         },
       ],
     },
@@ -51,33 +42,13 @@ const Sidebar = ({ isOpen, onClose }) => {
           path: "/materials/management",
           icon: FaFileAlt,
         },
-        {
-          name: "Report Generation",
-          path: "/admin/reports",
-          icon: FaChartBar,
-        },
-        {
-          name: "Data Analysis",
-          path: "/admin/analysis",
-          icon: FaChartBar,
-        },
-        {
-          name: "Learning Area Management",
-          path: "/admin/learning-areas",
-          icon: FaBook,
-        },
-        {
-          name: "Data Management",
-          path: "/admin/data",
-          icon: FaDatabase,
-        },
       ],
     },
   ];
 
   return (
     <div
-      className={`fixed top-0 left-0 h-full bg-gradient-to-b from-gray-800 to-gray-900 dark:from-gray-900 dark:to-gray-950 shadow-lg z-30 transition-all duration-200 border-r-2 border-gray-300 dark:border-gray-600 ${
+      className={`fixed top-0 left-0 h-full bg-gradient-to-b from-gray-800 to-gray-900 dark:from-gray-900 dark:to-gray-950 shadow-lg z-20 transition-all duration-200 border-r-2 border-gray-300 dark:border-gray-600 ${
         isOpen ? "w-64 translate-x-0" : "-translate-x-full"
       }`}
     >

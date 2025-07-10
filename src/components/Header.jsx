@@ -38,7 +38,7 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
   };
 
   return (
-    <header className="sticky top-0 bg-white dark:bg-gray-900 border-b-2 border-gray-300 dark:border-gray-600 z-40 transform transition-transform duration-200 ease-in-out w-full">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-100 via-cyan-100 to-blue-200 dark:from-blue-900 dark:via-cyan-900 dark:to-blue-800 border-b-2 border-gray-300 dark:border-gray-600 w-full font-[Poppins]">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
@@ -57,7 +57,7 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
                 ILeaRN
               </span>
               <span className="text-xl font-semibold text-gray-800 dark:text-white hidden sm:inline">
-                Imus Learning Resources Management System
+                IMUS LEARNING RESOURCE NAVIGATOR
               </span>
             </div>
           </div>
