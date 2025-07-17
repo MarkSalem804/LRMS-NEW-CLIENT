@@ -42,6 +42,11 @@ const Sidebar = ({ isOpen, onClose }) => {
           path: "/materials/management",
           icon: FaFileAlt,
         },
+        // {
+        //   name: "Data Management",
+        //   path: "/data-management",
+        //   icon: FaDatabase,
+        // },
       ],
     },
   ];

@@ -128,6 +128,67 @@ function resetPassword(email, newPassword) {
   });
 }
 
+function resendOtp(email) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(
+        `${BASE_URL}/users/resend-otp`,
+        { email },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      )
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
+}
+
+function getTwoFactorStatus(userId) {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${BASE_URL}/users/two-factor-status/${userId}`, {
+        withCredentials: true,
+      })
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
+}
+
+function toggleTwoFactor(userId, enabled) {
+  return new Promise((resolve, reject) => {
+    axios
+      .patch(
+        `${BASE_URL}/users/toggle-two-factor/${userId}`,
+        { enabled },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      )
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
+}
+
 export default {
   authenticate,
   verifyOtp,
@@ -139,4 +200,7 @@ export default {
   updateProfile,
   changePassword,
   resetPassword,
+  resendOtp,
+  getTwoFactorStatus,
+  toggleTwoFactor,
 };

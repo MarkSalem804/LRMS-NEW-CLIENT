@@ -21,18 +21,20 @@ import PilipinasLogo from "../../assets/Bagong-Pilipinas-Logo.png";
 import LoginBackground from "../../assets/LoginPageBackground.jpg";
 import userService from "../../services/user-endpoints";
 import PropTypes from "prop-types";
+import Swal from "sweetalert2";
+import "./sweetalert-custom.css";
 
 // Simple Toast component
-function Toast({ message, onClose }) {
+function Toast({ message, onClose, type = "error" }) {
   if (!message) return null;
   return (
     <div
       style={{
         position: "fixed",
-        top: 24,
+        bottom: 24,
         right: 24,
         zIndex: 9999,
-        background: "#f87171",
+        background: type === "success" ? "#22c55e" : "#f87171",
         color: "white",
         padding: "16px 24px",
         borderRadius: 8,
@@ -44,6 +46,7 @@ function Toast({ message, onClose }) {
         gap: 12,
         minWidth: 220,
       }}
+      className="hidden md:block" // only show on desktop
     >
       <span>{message}</span>
       <button
@@ -66,14 +69,15 @@ function Toast({ message, onClose }) {
 Toast.propTypes = {
   message: PropTypes.string,
   onClose: PropTypes.func.isRequired,
+  type: PropTypes.string,
 };
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState("");
-  const { setAuth } = useStateContext();
+  const [toast, setToast] = useState({ message: "", type: "error" });
+  const { setAuth, showSuccessMessage } = useStateContext();
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
@@ -86,54 +90,184 @@ const Login = () => {
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        setToast("");
-
+        setToast({ message: "", type: "error" });
+        // Show SweetAlert2 loading popup immediately
+        Swal.fire({
+          title: "Signing in...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+          showConfirmButton: false,
+          customClass: {
+            title: "swal2-custom-title",
+            popup: "swal2-custom-popup",
+            htmlContainer: "swal2-custom-html",
+          },
+        });
         // Call the authentication service
         const res = await userService.authenticate(values);
 
         if (res?.requires2FA) {
-          // Redirect to OTP verification page, pass email as state
-          navigate("/verify-otp", { state: { email: values.email } });
+          // Update SweetAlert2 popup for 2FA
+          Swal.update({
+            title:
+              "OTP Verification enabled, proceeding to OTP Verification Page",
+            timer: 1200,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            customClass: {
+              title: "swal2-custom-title text-sm",
+              popup: "swal2-custom-popup !w-64 !max-w-xs",
+              htmlContainer: "swal2-custom-html text-sm",
+            },
+          });
+          setTimeout(() => {
+            Swal.close();
+            navigate("/verify-otp", { state: { email: values.email } });
+          }, 1200);
           return;
         }
 
         if (res?.success) {
-          setAuth(res.data.user);
-          localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
+          // Close the "Signing in..." popup first
+          Swal.close();
 
-          // Redirect based on user role
-          if (res.data.user.role === "TEACHER") {
-            navigate("/client-page");
+          // Check if mobile
+          const isMobile = window.innerWidth < 768;
+          if (isMobile) {
+            // Use SweetAlert for mobile
+            Swal.fire({
+              title: "Successfully Logged in",
+              icon: "success",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: {
+                title: "swal2-custom-title text-sm",
+                popup: "swal2-custom-popup !w-64 !max-w-xs",
+                htmlContainer: "swal2-custom-html text-sm",
+              },
+            });
           } else {
-            navigate("/dashboard");
+            // Use global success message for desktop
+            showSuccessMessage("Successfully Logged in");
           }
+          setTimeout(() => {
+            setAuth(res.data.user);
+            localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
+            // Redirect based on user role
+            if (res.data.user.role === "TEACHER") {
+              navigate("/client-page");
+            } else {
+              navigate("/dashboard");
+            }
+          }, 1000);
         } else {
-          setToast("Authentication failed");
+          Swal.close();
+          const isMobile = window.innerWidth < 768;
+          if (isMobile) {
+            Swal.fire({
+              title: "Authentication failed",
+              icon: "error",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: {
+                title: "swal2-custom-title text-sm",
+                popup: "swal2-custom-popup !w-64 !max-w-xs",
+                htmlContainer: "swal2-custom-html text-sm",
+              },
+            });
+          } else {
+            setToast({ message: "Authentication failed", type: "error" });
+          }
         }
       } catch (err) {
-        console.error("Login error:", err);
-        let message =
+        Swal.close();
+        const isMobile = window.innerWidth < 768;
+        const errorMessage =
           err?.response?.status === 401
             ? "Invalid username or password."
             : err.message || "Login failed";
-        setToast(message);
+
+        if (isMobile) {
+          Swal.fire({
+            title: errorMessage,
+            icon: "error",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              title: "swal2-custom-title text-sm",
+              popup: "swal2-custom-popup !w-64 !max-w-xs",
+              htmlContainer: "swal2-custom-html text-sm",
+            },
+          });
+        } else {
+          setToast({ message: errorMessage, type: "error" });
+        }
       } finally {
         setLoading(false);
       }
     },
     validate: (values) => {
       const errors = {};
+      const isMobile = window.innerWidth < 768;
+
       if (!values.email && !values.password) {
-        setToast("Both fields must not be empty");
+        if (isMobile) {
+          Swal.fire({
+            title: "Both fields must not be empty",
+            icon: "warning",
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: {
+              title: "swal2-custom-title text-sm",
+              popup: "swal2-custom-popup !w-64 !max-w-xs",
+              htmlContainer: "swal2-custom-html text-sm",
+            },
+          });
+        } else {
+          setToast({
+            message: "Both fields must not be empty",
+            type: "warning",
+          });
+        }
         errors.email = "Email Required!";
         errors.password = "Password Required!";
       } else {
         if (!values.email) {
-          setToast("Email Required!");
+          if (isMobile) {
+            Swal.fire({
+              title: "Email Required!",
+              icon: "warning",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: {
+                title: "swal2-custom-title text-sm",
+                popup: "swal2-custom-popup !w-64 !max-w-xs",
+                htmlContainer: "swal2-custom-html text-sm",
+              },
+            });
+          } else {
+            setToast({ message: "Email Required!", type: "warning" });
+          }
           errors.email = "Email Required!";
         }
         if (!values.password) {
-          setToast("Password Required!");
+          if (isMobile) {
+            Swal.fire({
+              title: "Password Required!",
+              icon: "warning",
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: {
+                title: "swal2-custom-title text-sm",
+                popup: "swal2-custom-popup !w-64 !max-w-xs",
+                htmlContainer: "swal2-custom-html text-sm",
+              },
+            });
+          } else {
+            setToast({ message: "Password Required!", type: "warning" });
+          }
           errors.password = "Password Required!";
         }
       }
@@ -143,8 +277,12 @@ const Login = () => {
 
   return (
     <div>
-      <Toast message={toast} onClose={() => setToast("")} />
-      <div className="min-h-screen relative flex items-center justify-center p-4 font-poppins">
+      <Toast
+        message={toast.message}
+        onClose={() => setToast({ message: "", type: "error" })}
+        type={toast.type}
+      />
+      <div className="min-h-screen relative flex items-center justify-center p-2 sm:p-4 font-poppins">
         <div className="absolute inset-0 z-0">
           <img
             src={LoginBackground}
@@ -159,110 +297,125 @@ const Login = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-10 border border-gray-200 min-h-[700px]"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-2 sm:p-6 md:p-10 border border-gray-200 min-h-[500px] md:min-h-[700px]"
           >
-            <div className="flex flex-col md:flex-row gap-12">
-              <div className="w-full md:w-2/5 space-y-12">
-                <div className="flex items-center">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-12">
+              <div className="w-full md:w-2/5 space-y-8 md:space-y-12">
+                <div className="flex items-center justify-center md:justify-start mt-2">
                   <img
                     src={HeaderLogo}
                     alt="DepEd Logo"
-                    className="h-20 w-auto mr-4"
+                    className="h-14 w-auto mr-3 md:h-20 md:mr-4"
                   />
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900">
+                    <h1 className="text-xl md:text-3xl font-bold text-gray-900">
                       ILeaRN Portal
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-xs md:text-base text-gray-600">
                       Imus Learning Resources Navigator
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-4 p-5 bg-blue-100 rounded-xl">
-                    <div className="p-4 bg-primary-500/10 rounded-lg">
-                      <FaSchool className="text-primary-500 text-2xl" />
+                {/* Features section - only on md and up */}
+                <div className="hidden md:block space-y-4 md:space-y-6">
+                  <div className="flex items-center space-x-2 md:space-x-4 p-3 md:p-5 bg-blue-100 rounded-xl">
+                    <div className="p-2 md:p-4 bg-primary-500/10 rounded-lg">
+                      <FaSchool className="text-primary-500 text-lg md:text-2xl" />
                     </div>
                     <div>
-                      <h3 className="text-gray-900 font-medium text-lg">
+                      <h3 className="text-gray-900 font-medium text-base md:text-lg">
                         E-Resource Management
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-xs md:text-gray-600">
                         Efficiently manage school resources and learning
                         materials
                       </p>
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-4 p-5 bg-green-300 rounded-xl">
-                    <div className="p-4 bg-primary-500/10 rounded-lg">
-                      <FaBook className="text-primary-500 text-2xl" />
+                  <div className="flex items-center space-x-2 md:space-x-4 p-3 md:p-5 bg-green-300 rounded-xl">
+                    <div className="p-2 md:p-4 bg-primary-500/10 rounded-lg">
+                      <FaBook className="text-primary-500 text-lg md:text-2xl" />
                     </div>
                     <div>
-                      <h3 className="text-gray-900 font-medium text-lg">
+                      <h3 className="text-gray-900 font-medium text-base md:text-lg">
                         Learning Resources
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-xs md:text-gray-600">
                         Access comprehensive educational materials
                       </p>
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-4 p-5 bg-red-300 rounded-xl">
-                    <div className="p-4 bg-primary-500/10 rounded-lg">
-                      <FcAddDatabase className="text-primary-500 text-3xl" />
+                  <div className="flex items-center space-x-2 md:space-x-4 p-3 md:p-5 bg-red-300 rounded-xl">
+                    <div className="p-2 md:p-4 bg-primary-500/10 rounded-lg">
+                      <FcAddDatabase className="text-primary-500 text-xl md:text-3xl" />
                     </div>
                     <div>
-                      <h3 className="text-gray-900 font-medium text-lg">
+                      <h3 className="text-gray-900 font-medium text-base md:text-lg">
                         Repository for Materials
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-xs md:text-gray-600">
                         One stop shop for all learning materials
                       </p>
                     </div>
                   </div>
-
-                  <div className="flex justify-center mt-8 md:mt-10">
+                  <div className="flex justify-center mt-6 md:mt-8 hidden md:block">
                     <Link
                       to="/about-us"
-                      className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                      className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm text-xs md:text-base"
                     >
                       About Us
                     </Link>
                   </div>
-                  <div className="flex justify-center mt-8 md:mt-10">
+                  <div className="flex justify-center mt-4 md:mt-8 hidden md:block">
                     <a
                       href="https://wp.depedimuscity.com/?page_id=70"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+                      className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm text-xs md:text-base"
                     >
                       Citizen&apos;s Charter
                     </a>
                   </div>
                 </div>
-              </div>
 
+                {/* About Us and Citizen's Charter buttons below Sign In on mobile only */}
+                {/* <div className="block md:hidden mt-4 space-y-2 max-w-xs xs:max-w-sm sm:max-w-md mx-auto">
+                  <Link
+                    to="/about-us"
+                    className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm text-xs"
+                  >
+                    About Us
+                  </Link>
+                  <a
+                    href="https://wp.depedimuscity.com/?page_id=70"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm text-xs"
+                  >
+                    Citizen&apos;s Charter
+                  </a>
+                </div> */}
+              </div>
               <div className="w-full md:w-3/5">
                 <form
                   onSubmit={formik.handleSubmit}
-                  className="space-y-7 max-w-md mx-auto mt-32"
+                  className="space-y-5 md:space-y-7 max-w-xs xs:max-w-sm sm:max-w-md mx-auto mt-10 md:mt-32"
                 >
-                  <h2 className="text-3xl font-bold text-left text-gray-800 mb-8">
+                  <h2 className="text-2xl md:text-3xl font-bold text-left text-gray-800 mb-4 md:mb-8">
                     LOG IN
                   </h2>
 
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-lg font-medium text-gray-700 mb-1 uppercase"
+                      className="block text-sm md:text-lg font-medium text-gray-700 mb-1 uppercase"
                     >
                       E-mail
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaUser className="text-gray-400" />
+                        <FaUser className="text-gray-400 text-base md:text-lg" />
                       </div>
                       <input
                         type="text"
@@ -271,7 +424,7 @@ const Login = () => {
                         value={formik.values.email}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className={`block w-full pl-10 pr-3 py-2.5 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                        className={`block w-full pl-10 pr-3 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-xs md:text-base ${
                           formik.errors.email
                             ? "border-red-500"
                             : "border-gray-300"
@@ -284,13 +437,13 @@ const Login = () => {
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-lg font-medium text-gray-700 mb-1 uppercase"
+                      className="block text-sm md:text-lg font-medium text-gray-700 mb-1 uppercase"
                     >
                       Password
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaLock className="text-gray-400" />
+                        <FaLock className="text-gray-400 text-base md:text-lg" />
                       </div>
                       <input
                         type={showPassword ? "text" : "password"}
@@ -299,7 +452,7 @@ const Login = () => {
                         value={formik.values.password}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className={`block w-full pl-10 pr-10 py-2.5 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                        className={`block w-full pl-10 pr-10 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-xs md:text-base ${
                           formik.errors.password
                             ? "border-red-500"
                             : "border-gray-300"
@@ -312,9 +465,9 @@ const Login = () => {
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       >
                         {showPassword ? (
-                          <FaEyeSlash className="text-gray-400 hover:text-gray-500" />
+                          <FaEyeSlash className="text-gray-400 hover:text-gray-500 text-base md:text-lg" />
                         ) : (
-                          <FaEye className="text-gray-400 hover:text-gray-500" />
+                          <FaEye className="text-gray-400 hover:text-gray-500 text-base md:text-lg" />
                         )}
                       </button>
                     </div>
@@ -325,14 +478,31 @@ const Login = () => {
                     whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={loading}
-                    className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50"
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-xs md:text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50"
                   >
                     {loading ? "Signing in..." : "Sign in"}
                   </motion.button>
                 </form>
+                {/* About Us and Citizen's Charter buttons below the form on mobile only */}
+                <div className="block md:hidden mt-4 space-y-2 max-w-xs xs:max-w-sm sm:max-w-md mx-auto">
+                  <Link
+                    to="/about-us"
+                    className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm text-xs"
+                  >
+                    About Us
+                  </Link>
+                  <a
+                    href="https://wp.depedimuscity.com/?page_id=70"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block w-full text-center py-2 border border-blue-600 text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-sm text-xs"
+                  >
+                    Citizen&apos;s Charter
+                  </a>
+                </div>
 
-                <div className="mt-4 text-center max-w-md mx-auto">
-                  <p className="text-sm text-gray-600">
+                <div className="mt-4 text-center max-w-xs xs:max-w-sm sm:max-w-md mx-auto">
+                  <p className="text-xs md:text-sm text-gray-600">
                     Need help?{" "}
                     <Link
                       to="/support"
@@ -343,26 +513,26 @@ const Login = () => {
                   </p>
                 </div>
 
-                <div className="mt-28 pt-6 border-t border-gray-200 max-w-md mx-auto">
+                <div className="mt-10 md:mt-28 pt-6 border-t border-gray-200 max-w-xs xs:max-w-sm sm:max-w-md mx-auto">
                   <div className="flex flex-col items-center space-y-4">
-                    <div className="flex items-center space-x-8">
+                    <div className="flex items-center space-x-4 md:space-x-8">
                       <img
                         src={HeaderLogo}
                         alt="DepEd Logo"
-                        className="h-10 w-auto opacity-80 hover:opacity-100"
+                        className="h-8 w-auto md:h-10 opacity-80 hover:opacity-100"
                       />
                       <img
                         src={DepEdLogo}
                         alt="DepEd Logo 2"
-                        className="h-10 w-auto opacity-80 hover:opacity-100"
+                        className="h-8 w-auto md:h-10 opacity-80 hover:opacity-100"
                       />
                       <img
                         src={PilipinasLogo}
                         alt="Bagong Pilipinas Logo"
-                        className="h-16 w-auto opacity-80 hover:opacity-100 object-contain"
+                        className="h-12 w-auto md:h-16 opacity-80 hover:opacity-100 object-contain"
                       />
                     </div>
-                    <p className="text-sm text-gray-500 font-['Poppins']">
+                    <p className="text-xs md:text-sm text-gray-500 font-['Poppins']">
                       SDO - Imus City all rights reserved - Version{" "}
                       {__APP_VERSION__}
                     </p>

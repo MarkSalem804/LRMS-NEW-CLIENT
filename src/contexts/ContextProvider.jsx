@@ -11,10 +11,20 @@ export function ContextProvider({ children }) {
   const [closeMenus, setCloseMenus] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [newTicketsCount, setNewTicketsCount] = useState(0);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Method to update the new tickets count
   const updateNewTicketsCount = (count) => {
     setNewTicketsCount(count);
+  };
+
+  // Method to set success message
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
+    // Auto-clear after 3 seconds
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
   };
 
   const contextValue = useMemo(
@@ -29,6 +39,8 @@ export function ContextProvider({ children }) {
       setSelectedCategory,
       newTicketsCount,
       updateNewTicketsCount, // Added function to update the count
+      successMessage,
+      showSuccessMessage, // Added function to show success message
     }),
     [
       auth,
@@ -40,6 +52,7 @@ export function ContextProvider({ children }) {
       selectedCategory,
       setSelectedCategory,
       newTicketsCount,
+      successMessage,
     ]
   );
 

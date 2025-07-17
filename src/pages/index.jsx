@@ -7,5 +7,6 @@ export { default as NotFound } from "../pages/Administration Page/NotFound";
 export { default as AboutUs } from "../pages/Administration Page/AboutUs";
 export { default as UsersManagement } from "./Administration Page/UsersManagement";
 export { default as MaterialsManagement } from "./Administration Page/Management/MaterialsManagement";
+// export { default as DataManagement } from "./Administration Page/Management/DataManagement";
 export { default as ClientPage } from "./Client Page/ClientPage";
 export { default as VerificationPage } from "./Administration Page/OTPVerification";

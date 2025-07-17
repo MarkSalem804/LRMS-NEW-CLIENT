@@ -12,99 +12,93 @@ import {
 import MaterialCard from "../../components/MaterialCard";
 import { Link } from "react-router-dom";
 import MaterialsDetailsModal from "../../components/modals/MaterialsDetailsModal";
-import { getAllMaterials } from "../../services/lrms-endpoints"; // Import the API function
+import {
+  getAllMaterials,
+  getFilterOptions,
+} from "../../services/lrms-endpoints"; // Import the API functions
 
-const learningAreas = [
-  "MTB-MLE",
-  "Mathematics",
-  "Science",
-  "Filipino",
-  "Araling Panlipunan",
-  "MAPEH",
-  "Edukasyon sa Pagpapakatao",
-  "Edukasyong Pangtahanan at Pangkabuhayan",
-  "Technology and Livelihood Education",
-  "English",
-  "Reading and Literacy",
-  "Language",
-  "Makabansa",
-];
-
-const eppComponents = [
-  "Industrial Arts",
-  "Home Economics",
-  "ICT",
-  "Entrepreneurship",
-  "AFA",
-];
-
-const coreSubjects = [
-  "Oral Communication",
-  "Reading and Writing Skills",
-  "Komunikasyon at Pananaliksik sa Wika at Kulturang Pilipino",
-  "Pagbasa at Pagsusuri ng Iba't Ibang Teksto Tungo sa Pananaliksik",
-  "21st Century Literature from the Philippines and the World",
-  "Contemporary Philippine Arts from the Regions",
-  "Media and Information Literacy",
-  "General Mathematics",
-  "Statistics and Probability",
-  "Earth and Life Science",
-  "Physical Science",
-  "Introduction to the Philosophy of the Human Person",
-  "Personal Development",
-  "Understanding Culture, Society and Politics",
-  "Physical Education and Health",
-];
-
-const academicTracks = [
-  "Accountancy, Business and Management (ABM)",
-  "Humanities and Social Sciences (HUMSS)",
-  "Science, Technology, Engineering, and Mathematics (STEM)",
-  "General Academic Strand (GAS)",
-];
-
-const tvlTracks = [
-  "Home Economics",
-  "Information and Communications Technology (ICT)",
-  "Agri-Fishery Arts",
-  "Industrial Arts",
-  "TVL Maritime",
-];
-
-const sportsTracks = [
-  "Sports Coaching",
-  "Sports Officiating",
-  "Sports and Recreation",
-];
-const artsAndDesignTracks = [
-  "Performing Arts",
-  "Visual Arts",
-  "Media Arts",
-  "Literary Arts",
-];
-
-const appliedSubjects = [
-  "English for Academic and Professional Purposes",
-  "Practical Research 1",
-  "Practical Research 2",
-  "Filipino sa Piling Larang (Akademik, Isports, Sining at Tech-Voc)",
-  "Empowerment Technologies (ETech): ICT for Professional Tracks",
-  "Entrepreneurship",
-  "Inquiries, Investigations, and Immersions",
-];
-
-// Note: Specialized subjects are numerous and vary greatly by track and strand.
-// For this example, we'll use a placeholder or a general list.
-// A more robust solution might involve fetching these based on selected track/strand.
-const specializedSubjectsPlaceholder = [
-  "Specialized Subject Example 1 (ABM)",
-  "Specialized Subject Example 2 (STEM)",
-  "Specialized Subject Example 3 (HUMSS)",
-  "Specialized Subject Example 4 (TVL - ICT)",
-  // Add more examples or fetch dynamically
-];
-
-const resourceTypes = ["Module", "Lesson Exemplar", "Activity Guide"]; // Added resource types
+// Default filter options (fallback if API fails)
+const defaultFilterOptions = {
+  learningAreas: [
+    "MTB-MLE",
+    "Mathematics",
+    "Science",
+    "Filipino",
+    "Araling Panlipunan",
+    "MAPEH",
+    "Edukasyon sa Pagpapakatao",
+    "Edukasyong Pangtahanan at Pangkabuhayan",
+    "Technology and Livelihood Education",
+    "English",
+    "Reading and Literacy",
+    "Language",
+    "Makabansa",
+  ],
+  components: [
+    "Industrial Arts",
+    "Home Economics",
+    "ICT",
+    "Entrepreneurship",
+    "AFA",
+  ],
+  coreSubjects: [
+    "Oral Communication",
+    "Reading and Writing Skills",
+    "Komunikasyon at Pananaliksik sa Wika at Kulturang Pilipino",
+    "Pagbasa at Pagsusuri ng Iba't Ibang Teksto Tungo sa Pananaliksik",
+    "21st Century Literature from the Philippines and the World",
+    "Contemporary Philippine Arts from the Regions",
+    "Media and Information Literacy",
+    "General Mathematics",
+    "Statistics and Probability",
+    "Earth and Life Science",
+    "Physical Science",
+    "Introduction to the Philosophy of the Human Person",
+    "Personal Development",
+    "Understanding Culture, Society and Politics",
+    "Physical Education and Health",
+  ],
+  tracks: [
+    "Academic Track",
+    "TVL Track",
+    "Sports Track",
+    "Arts and Design Track",
+  ],
+  strands: [
+    "Accountancy, Business and Management (ABM)",
+    "Humanities and Social Sciences (HUMSS)",
+    "Science, Technology, Engineering, and Mathematics (STEM)",
+    "General Academic Strand (GAS)",
+    "Home Economics",
+    "Information and Communications Technology (ICT)",
+    "Agri-Fishery Arts",
+    "Industrial Arts",
+    "TVL Maritime",
+    "Sports Coaching",
+    "Sports Officiating",
+    "Sports and Recreation",
+    "Performing Arts",
+    "Visual Arts",
+    "Media Arts",
+    "Literary Arts",
+  ],
+  appliedSubjects: [
+    "English for Academic and Professional Purposes",
+    "Practical Research 1",
+    "Practical Research 2",
+    "Filipino sa Piling Larang (Akademik, Isports, Sining at Tech-Voc)",
+    "Empowerment Technologies (ETech): ICT for Professional Tracks",
+    "Entrepreneurship",
+    "Inquiries, Investigations, and Immersions",
+  ],
+  specializedSubjects: [
+    "Specialized Subject Example 1 (ABM)",
+    "Specialized Subject Example 2 (STEM)",
+    "Specialized Subject Example 3 (HUMSS)",
+    "Specialized Subject Example 4 (TVL - ICT)",
+  ],
+  types: ["Module", "Lesson Exemplar", "Activity Guide"],
+};
 
 const Materials = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -126,6 +120,8 @@ const Materials = () => {
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [filterOptions, setFilterOptions] = useState(defaultFilterOptions); // Dynamic filter options
+  const [isLoadingFilters, setIsLoadingFilters] = useState(true); // Loading state for filters
 
   // SHS Filter States
   const [selectedCoreSubject, setSelectedCoreSubject] = useState("");
@@ -186,6 +182,29 @@ const Materials = () => {
     }
     setSelectedResourceType(""); // Reset resource type on grade/category change
   }, [searchParams]);
+
+  // Fetch filter options from the API
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      setIsLoadingFilters(true);
+      try {
+        const response = await getFilterOptions();
+        if (response.success) {
+          setFilterOptions(response.data);
+        } else {
+          console.error("Failed to fetch filter options:", response.message);
+          // Keep using defaultFilterOptions as fallback
+        }
+      } catch (error) {
+        console.error("Error fetching filter options:", error);
+        // Keep using defaultFilterOptions as fallback
+      } finally {
+        setIsLoadingFilters(false);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Fetch materials from the API
   useEffect(() => {
@@ -478,275 +497,305 @@ const Materials = () => {
         {/* Filter Panel */}
         {isFilterOpen && (
           <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4 shadow-lg mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Grade Level
-                </label>
-                <select
-                  value={selectedGrade}
-                  onChange={(e) => handleGradeChange(e.target.value)}
-                  className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                >
-                  <option value="">
-                    {" "}
-                    {/* Default option based on context */}
-                    {selectedCategory
-                      ? `All ${selectedCategory.toUpperCase()} Grades`
-                      : "All Grades"}
-                  </option>
-                  {gradeOptions.map((gradeNum) => (
-                    <option key={gradeNum} value={gradeNum}>
-                      Grade {gradeNum}
-                    </option>
-                  ))}
-                </select>
+            {isLoadingFilters && (
+              <div className="text-center py-4 text-gray-600 dark:text-gray-300">
+                Loading filter options...
               </div>
-
-              {/* Resource Type Filter - Added Here, will be part of the 3-column grid */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Resource Type
-                </label>
-                <select
-                  value={selectedResourceType}
-                  onChange={(e) => setSelectedResourceType(e.target.value)}
-                  className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                >
-                  <option value="">All Types</option>
-                  {resourceTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
+            )}
+            {!isLoadingFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Grade Level
+                  </label>
+                  <select
+                    value={selectedGrade}
+                    onChange={(e) => handleGradeChange(e.target.value)}
+                    className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">
+                      {" "}
+                      {/* Default option based on context */}
+                      {selectedCategory
+                        ? `All ${selectedCategory.toUpperCase()} Grades`
+                        : "All Grades"}
                     </option>
-                  ))}
-                </select>
-              </div>
+                    {gradeOptions.map((gradeNum) => (
+                      <option key={gradeNum} value={gradeNum}>
+                        Grade {gradeNum}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Conditional Rendering of JHS/Elementary vs SHS filters */}
-              {(selectedCategory === "elementary" ||
-                selectedCategory === "jhs" ||
-                (selectedGrade && parseInt(selectedGrade) <= 10)) &&
-                !(
-                  selectedCategory === "shs" ||
-                  (selectedGrade && parseInt(selectedGrade) >= 11)
-                ) && (
-                  <>
-                    {/* JHS/Elementary Filters */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Learning Area
-                      </label>
-                      <select
-                        value={selectedArea}
-                        onChange={(e) => {
-                          setSelectedArea(e.target.value);
-                          setSelectedComponent(""); // Reset component when area changes
-                        }}
-                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Areas</option>
-                        {learningAreas.map((area) => (
-                          <option key={area} value={area}>
-                            {area}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                {/* Resource Type Filter - Added Here, will be part of the 3-column grid */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Resource Type
+                  </label>
+                  <select
+                    value={selectedResourceType}
+                    onChange={(e) => setSelectedResourceType(e.target.value)}
+                    className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">All Types</option>
+                    {filterOptions.types.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                    {/* EPP Components Filter */}
-                    {selectedArea ===
-                      "Edukasyong Pangtahanan at Pangkabuhayan" && (
+                {/* Conditional Rendering of JHS/Elementary vs SHS filters */}
+                {(selectedCategory === "elementary" ||
+                  selectedCategory === "jhs" ||
+                  (selectedGrade && parseInt(selectedGrade) <= 10)) &&
+                  !(
+                    selectedCategory === "shs" ||
+                    (selectedGrade && parseInt(selectedGrade) >= 11)
+                  ) && (
+                    <>
+                      {/* JHS/Elementary Filters */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          EPP Component
+                          Learning Area
                         </label>
                         <select
-                          value={selectedComponent}
-                          onChange={(e) => setSelectedComponent(e.target.value)}
+                          value={selectedArea}
+                          onChange={(e) => {
+                            setSelectedArea(e.target.value);
+                            setSelectedComponent(""); // Reset component when area changes
+                          }}
                           className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         >
-                          <option value="">All Components</option>
-                          {eppComponents.map((component) => (
-                            <option key={component} value={component}>
-                              {component}
+                          <option value="">All Areas</option>
+                          {filterOptions.learningAreas.map((area) => (
+                            <option key={area} value={area}>
+                              {area}
                             </option>
                           ))}
                         </select>
                       </div>
+
+                      {/* EPP Components Filter */}
+                      {selectedArea ===
+                        "Edukasyong Pangtahanan at Pangkabuhayan" && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            EPP Component
+                          </label>
+                          <select
+                            value={selectedComponent}
+                            onChange={(e) =>
+                              setSelectedComponent(e.target.value)
+                            }
+                            className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          >
+                            <option value="">All Components</option>
+                            {filterOptions.components.map((component) => (
+                              <option key={component} value={component}>
+                                {component}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                {(selectedCategory === "shs" ||
+                  (selectedGrade && parseInt(selectedGrade) >= 11)) && (
+                  <>
+                    {/* SHS Filters */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Core Subject
+                      </label>
+                      <select
+                        value={selectedCoreSubject}
+                        onChange={(e) => setSelectedCoreSubject(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      >
+                        <option value="">All Core Subjects</option>
+                        {filterOptions.coreSubjects.map((subject) => (
+                          <option key={subject} value={subject}>
+                            {subject}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Track
+                      </label>
+                      <select
+                        value={selectedTrack}
+                        onChange={(e) => {
+                          setSelectedTrack(e.target.value);
+                          setSelectedSubTrack(""); // Reset sub-track when main track changes
+                          setSelectedSpecializedSubject(""); // Reset specialized subject
+                        }}
+                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      >
+                        <option value="">All Tracks</option>
+                        <option value="Academic Track">Academic Track</option>
+                        <option value="TVL Track">TVL Track</option>
+                        <option value="Sports Track">Sports Track</option>
+                        <option value="Arts and Design Track">
+                          Arts and Design Track
+                        </option>
+                      </select>
+                    </div>
+
+                    {/* Conditional Sub-Track for Academic Track */}
+                    {selectedTrack === "Academic Track" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Academic Strand
+                        </label>
+                        <select
+                          value={selectedSubTrack}
+                          onChange={(e) => setSelectedSubTrack(e.target.value)}
+                          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        >
+                          <option value="">All Strands</option>
+                          {filterOptions.strands
+                            .filter(
+                              (strand) =>
+                                strand.includes("Accountancy") ||
+                                strand.includes("Humanities") ||
+                                strand.includes("STEM") ||
+                                strand.includes("General Academic")
+                            )
+                            .map((strand) => (
+                              <option key={strand} value={strand}>
+                                {strand}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
                     )}
+
+                    {/* Conditional Sub-Track for TVL Track */}
+                    {selectedTrack === "TVL Track" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          TVL Strand
+                        </label>
+                        <select
+                          value={selectedSubTrack}
+                          onChange={(e) => setSelectedSubTrack(e.target.value)}
+                          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        >
+                          <option value="">All Strands</option>
+                          {filterOptions.strands
+                            .filter(
+                              (strand) =>
+                                strand.includes("Home Economics") ||
+                                strand.includes("ICT") ||
+                                strand.includes("Agri-Fishery") ||
+                                strand.includes("Industrial Arts") ||
+                                strand.includes("Maritime")
+                            )
+                            .map((strand) => (
+                              <option key={strand} value={strand}>
+                                {strand}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+                    {/* Conditional Sub-Track for Sports Track */}
+                    {selectedTrack === "Sports Track" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Sports Strand
+                        </label>
+                        <select
+                          value={selectedSubTrack}
+                          onChange={(e) => setSelectedSubTrack(e.target.value)}
+                          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        >
+                          <option value="">All Strands</option>
+                          {filterOptions.strands
+                            .filter((strand) => strand.includes("Sports"))
+                            .map((strand) => (
+                              <option key={strand} value={strand}>
+                                {strand}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Conditional Sub-Track for Arts and Design Track */}
+                    {selectedTrack === "Arts and Design Track" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Arts and Design Strand
+                        </label>
+                        <select
+                          value={selectedSubTrack}
+                          onChange={(e) => setSelectedSubTrack(e.target.value)}
+                          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        >
+                          <option value="">All Strands</option>
+                          {filterOptions.strands
+                            .filter((strand) => strand.includes("Arts"))
+                            .map((strand) => (
+                              <option key={strand} value={strand}>
+                                {strand}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Applied Subject
+                      </label>
+                      <select
+                        value={selectedAppliedSubject}
+                        onChange={(e) =>
+                          setSelectedAppliedSubject(e.target.value)
+                        }
+                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      >
+                        <option value="">All Applied Subjects</option>
+                        {filterOptions.appliedSubjects.map((subject) => (
+                          <option key={subject} value={subject}>
+                            {subject}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Specialized Subject (Placeholder)
+                      </label>
+                      <select
+                        value={selectedSpecializedSubject}
+                        onChange={(e) =>
+                          setSelectedSpecializedSubject(e.target.value)
+                        }
+                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      >
+                        <option value="">All Specialized Subjects</option>
+                        {filterOptions.specializedSubjects.map((subject) => (
+                          <option key={subject} value={subject}>
+                            {subject}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </>
                 )}
-
-              {(selectedCategory === "shs" ||
-                (selectedGrade && parseInt(selectedGrade) >= 11)) && (
-                <>
-                  {/* SHS Filters */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Core Subject
-                    </label>
-                    <select
-                      value={selectedCoreSubject}
-                      onChange={(e) => setSelectedCoreSubject(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="">All Core Subjects</option>
-                      {coreSubjects.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Track
-                    </label>
-                    <select
-                      value={selectedTrack}
-                      onChange={(e) => {
-                        setSelectedTrack(e.target.value);
-                        setSelectedSubTrack(""); // Reset sub-track when main track changes
-                        setSelectedSpecializedSubject(""); // Reset specialized subject
-                      }}
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="">All Tracks</option>
-                      <option value="Academic Track">Academic Track</option>
-                      <option value="TVL Track">TVL Track</option>
-                      <option value="Sports Track">Sports Track</option>
-                      <option value="Arts and Design Track">
-                        Arts and Design Track
-                      </option>
-                    </select>
-                  </div>
-
-                  {/* Conditional Sub-Track for Academic Track */}
-                  {selectedTrack === "Academic Track" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Academic Strand
-                      </label>
-                      <select
-                        value={selectedSubTrack}
-                        onChange={(e) => setSelectedSubTrack(e.target.value)}
-                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Strands</option>
-                        {academicTracks.map((strand) => (
-                          <option key={strand} value={strand}>
-                            {strand}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Conditional Sub-Track for TVL Track */}
-                  {selectedTrack === "TVL Track" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        TVL Strand
-                      </label>
-                      <select
-                        value={selectedSubTrack}
-                        onChange={(e) => setSelectedSubTrack(e.target.value)}
-                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Strands</option>
-                        {tvlTracks.map((strand) => (
-                          <option key={strand} value={strand}>
-                            {strand}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  {/* Conditional Sub-Track for Sports Track */}
-                  {selectedTrack === "Sports Track" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Sports Strand
-                      </label>
-                      <select
-                        value={selectedSubTrack}
-                        onChange={(e) => setSelectedSubTrack(e.target.value)}
-                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Strands</option>
-                        {sportsTracks.map((strand) => (
-                          <option key={strand} value={strand}>
-                            {strand}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Conditional Sub-Track for Arts and Design Track */}
-                  {selectedTrack === "Arts and Design Track" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Arts and Design Strand
-                      </label>
-                      <select
-                        value={selectedSubTrack}
-                        onChange={(e) => setSelectedSubTrack(e.target.value)}
-                        className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Strands</option>
-                        {artsAndDesignTracks.map((strand) => (
-                          <option key={strand} value={strand}>
-                            {strand}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Applied Subject
-                    </label>
-                    <select
-                      value={selectedAppliedSubject}
-                      onChange={(e) =>
-                        setSelectedAppliedSubject(e.target.value)
-                      }
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="">All Applied Subjects</option>
-                      {appliedSubjects.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Specialized Subject (Placeholder)
-                    </label>
-                    <select
-                      value={selectedSpecializedSubject}
-                      onChange={(e) =>
-                        setSelectedSpecializedSubject(e.target.value)
-                      }
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="">All Specialized Subjects</option>
-                      {specializedSubjectsPlaceholder.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
 

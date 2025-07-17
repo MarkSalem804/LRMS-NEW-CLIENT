@@ -10,6 +10,7 @@ import {
   AboutUs,
   UsersManagement,
   MaterialsManagement,
+  // DataManagement,
   ClientPage,
   VerificationPage,
 } from "./pages";
@@ -22,6 +23,7 @@ import SHSMaterials from "./pages/Client Page/SHSMaterials";
 import JHSMaterials from "./pages/Client Page/JHSMaterials";
 import ElemMaterials from "./pages/Client Page/ElemMaterials";
 import KinderMaterials from "./pages/Client Page/KinderMaterials";
+import GlobalSuccessMessage from "./components/GlobalSuccessMessage";
 
 // Set the app element for accessibility
 Modal.setAppElement("#root");
@@ -31,6 +33,7 @@ function App() {
 
   return (
     <ThemeProvider>
+      <GlobalSuccessMessage />
       <Routes>
         {/* Default route: redirect to /login if not authenticated */}
         <Route index element={<Navigate to="/login" replace />} />
@@ -54,6 +57,7 @@ function App() {
               path="/materials/management"
               element={<MaterialsManagement />}
             />
+            {/* <Route path="/data-management" element={<DataManagement />} /> */}
             <Route index element={<Navigate to="/dashboard" replace />} />
           </Route>
           <Route path="/client-page" element={<ClientPage />} />

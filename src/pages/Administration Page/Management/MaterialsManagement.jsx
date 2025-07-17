@@ -623,251 +623,271 @@ const MaterialsManagement = () => {
       )}
 
       {/* Materials Table */}
-      <div className="bg-blue-50 text-gray-800 dark:bg-gray-800 dark:text-white rounded-lg shadow overflow-hidden mb-0 border border-blue-500 dark:border-gray-700">
-        <table className="min-w-full divide-y divide-gray-400 dark:divide-gray-700">
-          <thead className="bg-blue-500 dark:bg-blue-700 sticky top-0">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                Title
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                Grade Level
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                Learning Area
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                Resource Type
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-400 dark:divide-gray-700">
-            {isLoading ? (
+      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-blue-500 dark:bg-blue-700 sticky top-0 z-10">
               <tr>
-                <td colSpan="5" className="px-6 py-4 text-center">
-                  Loading materials...
-                </td>
+                <th className="px-6 py-3 w-48 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
+                  Title
+                </th>
+                <th className="px-6 py-3 w-32 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
+                  Grade Level
+                </th>
+                <th className="px-6 py-3 w-40 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
+                  Learning Area
+                </th>
+                <th className="px-6 py-3 w-40 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
+                  Resource Type
+                </th>
+                <th className="px-6 py-3 w-32 text-right text-xs font-medium text-white uppercase tracking-wider truncate">
+                  Actions
+                </th>
               </tr>
-            ) : paginatedMaterials.length > 0 ? (
-              <>
-                {paginatedMaterials.map((material) => (
-                  <tr key={material.id} className="h-[73px]">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {material.title}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {material.description}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">
-                        {material.gradeLevelName || "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">
-                        {material.learningAreaName ||
-                          material.subjectTypeName ||
-                          "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">
-                        {material.typeName || "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => handleViewMaterial(material.id)}
-                          className="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400"
-                          title="View Material"
-                        >
-                          <FaEye size={16} />
-                        </button>
-                        <Link
-                          to={`/materials/edit/${material.id}`}
-                          className="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400"
-                        >
-                          <FaEdit size={16} />
-                        </Link>
-                        <button
-                          // onClick={() => handleDelete(material.id)}
-                          className="text-red-600 hover:text-red-900 dark:hover:text-red-400"
-                        >
-                          <FaTrash size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleUploadFile(material)}
-                          className="text-green-600 hover:text-green-900 dark:hover:text-green-400"
-                        >
-                          <FaUpload size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {/* Add empty rows if needed */}
-                {Array.from({
-                  length: Math.max(0, itemsPerPage - paginatedMaterials.length),
-                }).map((_, index) => (
-                  <tr key={`empty-${index}`} className="h-[73px]">
-                    <td className="px-6 py-4 whitespace-nowrap" colSpan="5">
-                      <div className="h-full"></div>
-                    </td>
-                  </tr>
-                ))}
-              </>
-            ) : (
-              <tr>
-                <td colSpan="5" className="px-6 py-4 text-center">
-                  No materials found matching your criteria.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-4 text-center">
+                    Loading materials...
+                  </td>
+                </tr>
+              ) : paginatedMaterials.length > 0 ? (
+                <>
+                  {paginatedMaterials.map((material) => (
+                    <tr
+                      key={material.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <td className="px-6 py-4 w-48 whitespace-nowrap text-sm text-gray-900 dark:text-white h-16 truncate overflow-hidden">
+                        <div className="flex flex-col justify-center h-full w-44 h-12">
+                          <div className="font-medium truncate overflow-hidden whitespace-nowrap w-full">
+                            {material.title}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate overflow-hidden whitespace-nowrap min-h-[1.25rem] w-full">
+                            {material.description || "\u00A0"}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 w-32 h-16 whitespace-nowrap text-sm text-gray-900 dark:text-white truncate overflow-hidden">
+                        <div className="w-full h-full flex items-center truncate">
+                          {material.gradeLevelName || "N/A"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 w-40 h-16 whitespace-nowrap text-sm text-gray-900 dark:text-white truncate overflow-hidden">
+                        <div className="w-full h-full flex items-center truncate">
+                          {material.learningAreaName ||
+                            material.subjectTypeName ||
+                            "N/A"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 w-40 h-16 whitespace-nowrap text-sm text-gray-900 dark:text-white truncate overflow-hidden">
+                        <div className="w-full h-full flex items-center truncate">
+                          {material.typeName || "N/A"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 w-32 h-16 whitespace-nowrap text-right text-sm font-medium truncate overflow-hidden">
+                        <div className="flex justify-end gap-2 h-full items-center">
+                          <button
+                            onClick={() => handleViewMaterial(material.id)}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                            title="View Material"
+                          >
+                            <FaEye size={16} />
+                          </button>
+                          <Link
+                            to={`/materials/edit/${material.id}`}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <FaEdit size={16} />
+                          </Link>
+                          <button
+                            // onClick={() => handleDelete(material.id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                          >
+                            <FaTrash size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleUploadFile(material)}
+                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                          >
+                            <FaUpload size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Add empty rows if needed */}
+                  {Array.from({
+                    length: Math.max(
+                      0,
+                      itemsPerPage - paginatedMaterials.length
+                    ),
+                  }).map((_, index) => (
+                    <tr key={`empty-${index}`} className="h-16">
+                      <td
+                        className="px-6 py-4 w-48 whitespace-nowrap h-16 truncate overflow-hidden"
+                        colSpan="5"
+                      >
+                        <div className="h-full"></div>
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              ) : (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No materials found matching your criteria.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {/* Summary */}
+        <div className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-700">
+          Showing {paginatedMaterials.length} of {filteredMaterials.length}{" "}
+          materials
+          {searchTerm && ` matching "${searchTerm}"`}
+        </div>
+      </div>
 
-        {/* Pagination */}
-        {totalPages > 0 && (
-          <div className="bg-blue-500 px-4 py-3 flex items-center justify-between border-t border-blue-600 sm:px-6">
-            <div className="flex-1 flex justify-between sm:hidden">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
+      {/* Pagination */}
+      {totalPages > 0 && (
+        <div className="bg-blue-500 px-4 py-3 flex items-center justify-between border-t border-blue-600 sm:px-6">
+          <div className="flex-1 flex justify-between sm:hidden">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-white">
+                Showing{" "}
+                <span className="font-medium">
+                  {filteredMaterials.length === 0
+                    ? 0
+                    : (currentPage - 1) * itemsPerPage + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-medium">
+                  {Math.min(
+                    currentPage * itemsPerPage,
+                    filteredMaterials.length
+                  )}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium">{filteredMaterials.length}</span>{" "}
+                results
+              </p>
             </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-white">
-                  Showing{" "}
-                  <span className="font-medium">
-                    {filteredMaterials.length === 0
-                      ? 0
-                      : (currentPage - 1) * itemsPerPage + 1}
-                  </span>{" "}
-                  to{" "}
-                  <span className="font-medium">
-                    {Math.min(
-                      currentPage * itemsPerPage,
-                      filteredMaterials.length
-                    )}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-medium">
-                    {filteredMaterials.length}
-                  </span>{" "}
-                  results
-                </p>
-              </div>
-              <div>
-                <nav
-                  className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                  aria-label="Pagination"
+            <div>
+              <nav
+                className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                aria-label="Pagination"
+              >
+                {/* First Page Button */}
+                <button
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {/* First Page Button */}
-                  <button
-                    onClick={() => handlePageChange(1)}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="sr-only">First</span>
-                    &laquo;
-                  </button>
+                  <span className="sr-only">First</span>
+                  &laquo;
+                </button>
 
-                  {/* Previous Page Button */}
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="sr-only">Previous</span>
-                    &lsaquo;
-                  </button>
+                {/* Previous Page Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="sr-only">Previous</span>
+                  &lsaquo;
+                </button>
 
-                  {/* Page Numbers */}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((page) => {
+                {/* Page Numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((page) => {
+                    return (
+                      page === 1 ||
+                      page === totalPages ||
+                      Math.abs(currentPage - page) <= 1
+                    );
+                  })
+                  .map((page, index, array) => {
+                    if (index > 0 && array[index - 1] !== page - 1) {
                       return (
-                        page === 1 ||
-                        page === totalPages ||
-                        Math.abs(currentPage - page) <= 1
+                        <React.Fragment key={`ellipsis-${page}`}>
+                          <span className="relative inline-flex items-center px-4 py-2 border border-white bg-blue-500 text-sm font-medium text-white">
+                            ...
+                          </span>
+                          <button
+                            onClick={() => handlePageChange(page)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              currentPage === page
+                                ? "z-10 bg-white border-white text-blue-500"
+                                : "bg-blue-500 border-white text-white hover:bg-blue-600"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        </React.Fragment>
                       );
-                    })
-                    .map((page, index, array) => {
-                      if (index > 0 && array[index - 1] !== page - 1) {
-                        return (
-                          <React.Fragment key={`ellipsis-${page}`}>
-                            <span className="relative inline-flex items-center px-4 py-2 border border-white bg-blue-500 text-sm font-medium text-white">
-                              ...
-                            </span>
-                            <button
-                              onClick={() => handlePageChange(page)}
-                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                                currentPage === page
-                                  ? "z-10 bg-white border-white text-blue-500"
-                                  : "bg-blue-500 border-white text-white hover:bg-blue-600"
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          </React.Fragment>
-                        );
-                      }
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                            currentPage === page
-                              ? "z-10 bg-white border-white text-blue-500"
-                              : "bg-blue-500 border-white text-white hover:bg-blue-600"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    })}
+                    }
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          currentPage === page
+                            ? "z-10 bg-white border-white text-blue-500"
+                            : "bg-blue-500 border-white text-white hover:bg-blue-600"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
 
-                  {/* Next Page Button */}
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="sr-only">Next</span>
-                    &rsaquo;
-                  </button>
+                {/* Next Page Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="sr-only">Next</span>
+                  &rsaquo;
+                </button>
 
-                  {/* Last Page Button */}
-                  <button
-                    onClick={() => handlePageChange(totalPages)}
-                    disabled={currentPage === totalPages}
-                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="sr-only">Last</span>
-                    &raquo;
-                  </button>
-                </nav>
-              </div>
+                {/* Last Page Button */}
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="sr-only">Last</span>
+                  &raquo;
+                </button>
+              </nav>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Metadata Upload Modal */}
       {isMetadataModalOpen && (
