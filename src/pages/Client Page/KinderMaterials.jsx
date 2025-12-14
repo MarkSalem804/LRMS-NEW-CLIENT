@@ -18,11 +18,13 @@ const KinderMaterials = () => {
   const [gradeLevel, setGradeLevel] = useState("");
   const [learningArea, setLearningArea] = useState("");
   const [component, setComponent] = useState("");
+  const [resourceType, setResourceType] = useState("");
 
   // Options
   const [gradeLevels, setGradeLevels] = useState([]);
   const [learningAreas, setLearningAreas] = useState([]);
   const [components, setComponents] = useState([]);
+  const [resourceTypes, setResourceTypes] = useState([]);
 
   const [view, setView] = useState("card");
 
@@ -60,6 +62,9 @@ const KinderMaterials = () => {
           setComponents([
             ...new Set(kinder.map((m) => m.componentName).filter(Boolean)),
           ]);
+          setResourceTypes([
+            ...new Set(kinder.map((m) => m.typeName).filter(Boolean)),
+          ]);
         }
       } finally {
         setIsLoading(false);
@@ -84,8 +89,10 @@ const KinderMaterials = () => {
       filtered = filtered.filter((m) => m.learningAreaName === learningArea);
     if (component)
       filtered = filtered.filter((m) => m.componentName === component);
+    if (resourceType)
+      filtered = filtered.filter((m) => m.typeName === resourceType);
     setFilteredMaterials(filtered);
-  }, [search, gradeLevel, learningArea, component, materials]);
+  }, [search, gradeLevel, learningArea, component, resourceType, materials]);
 
   const handleView = async (material) => {
     try {
@@ -192,6 +199,18 @@ const KinderMaterials = () => {
               {components.map((c) => (
                 <option key={c} value={c}>
                   {c}
+                </option>
+              ))}
+            </select>
+            <select
+              value={resourceType}
+              onChange={(e) => setResourceType(e.target.value)}
+              className="px-4 py-2 rounded border border-gray-300"
+            >
+              <option value="">All Resource Types</option>
+              {resourceTypes.map((r) => (
+                <option key={r} value={r}>
+                  {r}
                 </option>
               ))}
             </select>
@@ -416,50 +435,95 @@ const KinderMaterials = () => {
                   setViewMaterialTitle("");
                 }}
                 contentLabel="View Material"
-                className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999]"
-                overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[9998]"
+                className="fixed inset-0 flex items-center justify-center p-2 z-[9999]"
+                overlayClassName="fixed inset-0 bg-black bg-opacity-70 z-[9998]"
               >
-                <div className="bg-white rounded-xl w-full max-w-4xl h-[80vh] flex flex-col shadow-2xl relative z-[9999] p-0">
-                  {/* Modal Header */}
-                  <div className="bg-gradient-to-r from-pink-600 to-pink-400 px-6 pt-6 pb-4 rounded-t-xl flex justify-between items-center">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white mb-1">
-                        {viewMaterialTitle || "View Material"}
-                      </h2>
-                      <p className="text-sm text-pink-100">
-                        Learning Resource Material
-                      </p>
-                    </div>
+                <div className="bg-white rounded-lg shadow-2xl w-full h-full max-w-[98vw] max-h-[98vh] flex flex-col">
+                  {/* Header - Simple Title Bar */}
+                  <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+                    <svg
+                      className="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <h3 className="text-base font-semibold text-white truncate">
+                      {viewMaterialTitle || "PDF Document"}
+                    </h3>
+                  </div>
+
+                  {/* PDF Viewer */}
+                  <div className="flex-1 overflow-hidden bg-gray-800">
+                    {viewMaterialUrl ? (
+                      <iframe
+                        src={viewMaterialUrl}
+                        className="w-full h-full border-0"
+                        title={viewMaterialTitle || "PDF Viewer"}
+                      ></iframe>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        <div className="text-center">
+                          <p className="text-lg mb-2">No material to display</p>
+                          <p className="text-sm">
+                            Please select a material to view
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer - Action Buttons */}
+                  <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+                    <a
+                      href={viewMaterialUrl}
+                      download={viewMaterialTitle}
+                      className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 shadow-md hover:shadow-lg"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        />
+                      </svg>
+                      Download
+                    </a>
                     <button
                       onClick={() => {
                         setIsViewModalOpen(false);
                         setViewMaterialUrl("");
                         setViewMaterialTitle("");
                       }}
-                      className="text-white hover:text-pink-100 transition-colors duration-200 p-2 rounded-full hover:bg-pink-500"
-                      aria-label="Close"
+                      className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium flex items-center gap-2"
                     >
-                      <span className="text-3xl leading-none">&times;</span>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                      Close
                     </button>
-                  </div>
-                  <div className="flex-1 bg-white rounded-b-xl p-6 overflow-hidden">
-                    {viewMaterialUrl ? (
-                      <iframe
-                        src={viewMaterialUrl}
-                        title={viewMaterialTitle}
-                        className="w-full h-full border-0 rounded-lg"
-                        aria-label={viewMaterialTitle}
-                      />
-                    ) : (
-                      <div className="flex-1 flex items-center justify-center text-gray-500">
-                        <div className="text-center">
-                          <p className="text-lg mb-2">No material to display</p>
-                          <p className="text-sm text-gray-400">
-                            Please select a material to view
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </Modal>

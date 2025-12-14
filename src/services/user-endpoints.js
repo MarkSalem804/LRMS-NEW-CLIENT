@@ -3,6 +3,7 @@ import axios from "axios";
 const customError = new Error("Network error or no response");
 // const BASE_URL = "http://localhost:5001";
 const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
+// const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
 
 function authenticate(account) {
   return new Promise((resolve, reject) => {
@@ -189,6 +190,46 @@ function toggleTwoFactor(userId, enabled) {
   });
 }
 
+function getOnlineUsers() {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${BASE_URL}/users/online-users`, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      })
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
+}
+
+function selfRegister(email) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(
+        `${BASE_URL}/users/self-register`,
+        { email },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      )
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
+}
+
 export default {
   authenticate,
   verifyOtp,
@@ -203,4 +244,6 @@ export default {
   resendOtp,
   getTwoFactorStatus,
   toggleTwoFactor,
+  getOnlineUsers,
+  selfRegister,
 };

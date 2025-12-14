@@ -1,6 +1,13 @@
 /* eslint-disable no-unused-vars */
-import React, { createContext, useContext, useState, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useEffect,
+} from "react";
 import PropTypes from "prop-types";
+import { initializeSocket, disconnectSocket } from "../services/socket-service";
 
 const StateContext = createContext();
 
@@ -12,6 +19,22 @@ export function ContextProvider({ children }) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [newTicketsCount, setNewTicketsCount] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Initialize Socket.io when user logs in
+  useEffect(() => {
+    if (auth && auth.id) {
+      console.log("🔌 Initializing Socket.io for user:", auth.email);
+      initializeSocket(auth);
+    } else {
+      console.log("🔌 Disconnecting Socket.io");
+      disconnectSocket();
+    }
+
+    // Cleanup on unmount
+    return () => {
+      disconnectSocket();
+    };
+  }, [auth]);
 
   // Method to update the new tickets count
   const updateNewTicketsCount = (count) => {

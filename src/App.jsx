@@ -15,6 +15,7 @@ import {
   VerificationPage,
 } from "./pages";
 import MaterialDirectory from "./pages/Client Page/MaterialDirectory";
+import ActivityLogs from "./pages/Administration Page/ActivityLogs";
 import { ThemeProvider } from "./context/ThemeContext";
 // import { useStateContext } from "./contexts/ContextProvider";
 import RequireAuth from "./contexts/RequireAuth";
@@ -57,6 +58,7 @@ function App() {
               path="/materials/management"
               element={<MaterialsManagement />}
             />
+            <Route path="/activity-logs" element={<ActivityLogs />} />
             {/* <Route path="/data-management" element={<DataManagement />} /> */}
             <Route index element={<Navigate to="/dashboard" replace />} />
           </Route>

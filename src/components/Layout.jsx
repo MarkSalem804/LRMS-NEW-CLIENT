@@ -2,30 +2,28 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-// import Footer from "./Footer";
 
 const Layout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const toggleSidebar = () => setIsSidebarOpen((open) => !open);
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {/* Sidebar is fixed */}
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      {/* Main content area, with left margin for sidebar */}
-      <div
-        className={`ml-0 ${
-          isSidebarOpen ? "lg:ml-64" : ""
-        } transition-all duration-200`}
-      >
-        {/* Sticky header at the top of the window */}
-        <Header onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-        {/* Background and content layering */}
-        <main className="min-h-screen p-6">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar isCollapsed={isSidebarCollapsed} onToggle={toggleSidebar} />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header/Topbar */}
+        <Header />
+
+        {/* Content Area - Renders nested routes */}
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
-        {/* <Footer /> */}
       </div>
     </div>
   );

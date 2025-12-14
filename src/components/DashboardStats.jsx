@@ -281,98 +281,140 @@ const DashboardStats = () => {
         {/* Right: Stats Cards */}
         <div className="w-full lg:w-72 flex flex-row lg:flex-col gap-4 mt-8 lg:mt-0 lg:ml-8">
           {/* Card: Total Materials */}
-          <div className="bg-pink-100 dark:bg-pink-200 rounded-lg shadow p-4 border border-pink-200 dark:border-pink-300 flex flex-row items-center">
-            <FaBook
-              className="text-pink-500 dark:text-pink-700 mr-4"
-              size={36}
-            />
-            <div className="flex flex-col flex-1">
-              <span className="text-xs text-pink-700 dark:text-pink-900 font-semibold">
+          <div className="bg-gradient-to-r from-pink-200 to-rose-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+            {/* Card Content */}
+            <div className="relative z-10">
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
                 Total Materials
-              </span>
-              <span className="text-2xl font-bold text-pink-700 dark:text-pink-900">
+              </h4>
+              <p className="text-2xl font-bold text-gray-800 mb-2">
                 {totalMaterials}
-              </span>
+              </p>
             </div>
+
+            {/* Icon in top-right corner */}
+            <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+              <FaBook className="text-pink-600 text-2xl" />
+            </div>
+
+            {/* Description text */}
+            <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+              All materials
+            </p>
           </div>
           {/* Card: Available Grade Levels */}
-          <div className="bg-blue-100 dark:bg-blue-200 rounded-lg shadow p-4 border border-blue-200 dark:border-blue-300 flex flex-row items-center">
-            <FaListOl
-              className="text-blue-500 dark:text-blue-700 mr-4"
-              size={36}
-            />
-            <div className="flex flex-col flex-1">
-              <span className="text-xs text-blue-700 dark:text-blue-900 font-semibold">
-                Available Grade Levels
-              </span>
-              <span className="text-2xl font-bold text-blue-700 dark:text-blue-900">
+          <div className="bg-gradient-to-r from-blue-200 to-cyan-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+            {/* Card Content */}
+            <div className="relative z-10">
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Grade Levels
+              </h4>
+              <p className="text-2xl font-bold text-gray-800 mb-2">
                 {availableGradeLevels}
-              </span>
+              </p>
             </div>
+
+            {/* Icon in top-right corner */}
+            <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+              <FaListOl className="text-blue-600 text-2xl" />
+            </div>
+
+            {/* Description text */}
+            <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+              Available levels
+            </p>
           </div>
           {/* Card: SHS Materials */}
-          <div className="bg-green-100 dark:bg-green-200 rounded-lg shadow p-4 border border-green-200 dark:border-green-300 flex flex-row items-center">
-            <FaUserGraduate
-              className="text-green-500 dark:text-green-700 mr-4"
-              size={36}
-            />
-            <div className="flex flex-col flex-1">
-              <span className="text-xs text-green-700 dark:text-green-900 font-semibold">
+          <div className="bg-gradient-to-r from-green-200 to-emerald-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+            {/* Card Content */}
+            <div className="relative z-10">
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
                 SHS Materials
-              </span>
-              <span className="text-2xl font-bold text-green-700 dark:text-green-900">
+              </h4>
+              <p className="text-2xl font-bold text-gray-800 mb-2">
                 {shsCount}
-              </span>
+              </p>
             </div>
+
+            {/* Icon in top-right corner */}
+            <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+              <FaUserGraduate className="text-green-600 text-2xl" />
+            </div>
+
+            {/* Description text */}
+            <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+              Senior High School
+            </p>
           </div>
           {/* Card: JHS Materials */}
-          <div className="bg-yellow-100 dark:bg-yellow-200 rounded-lg shadow p-4 border border-yellow-200 dark:border-yellow-300 flex flex-row items-center">
-            <FaChalkboardTeacher
-              className="text-yellow-500 dark:text-yellow-700 mr-4"
-              size={36}
-            />
-            <div className="flex flex-col flex-1">
-              <span className="text-xs text-yellow-700 dark:text-yellow-900 font-semibold">
+          <div className="bg-gradient-to-r from-orange-200 to-yellow-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+            {/* Card Content */}
+            <div className="relative z-10">
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
                 JHS Materials
-              </span>
-              <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-900">
+              </h4>
+              <p className="text-2xl font-bold text-gray-800 mb-2">
                 {jhsCount}
-              </span>
+              </p>
             </div>
+
+            {/* Icon in top-right corner */}
+            <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+              <FaChalkboardTeacher className="text-orange-600 text-2xl" />
+            </div>
+
+            {/* Description text */}
+            <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+              Junior High School
+            </p>
           </div>
           {/* Card: Elementary Materials */}
-          <div className="bg-purple-100 dark:bg-purple-200 rounded-lg shadow p-4 border border-purple-200 dark:border-purple-300 flex flex-row items-center">
-            <FaChild
-              className="text-purple-500 dark:text-purple-700 mr-4"
-              size={36}
-            />
-            <div className="flex flex-col flex-1">
-              <span className="text-xs text-purple-700 dark:text-purple-900 font-semibold">
-                Elementary Materials
-              </span>
-              <span className="text-2xl font-bold text-purple-700 dark:text-purple-900">
+          <div className="bg-gradient-to-r from-purple-200 to-violet-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+            {/* Card Content */}
+            <div className="relative z-10">
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Elementary
+              </h4>
+              <p className="text-2xl font-bold text-gray-800 mb-2">
                 {elemCount}
-              </span>
+              </p>
             </div>
+
+            {/* Icon in top-right corner */}
+            <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+              <FaChild className="text-purple-600 text-2xl" />
+            </div>
+
+            {/* Description text */}
+            <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+              Elementary materials
+            </p>
           </div>
           {/* Card: Kindergarten Materials */}
-          <div className="bg-pink-100 dark:bg-pink-200 rounded-lg shadow p-4 border border-pink-200 dark:border-pink-300 flex flex-row items-center">
-            <FaPuzzlePiece
-              className="text-pink-500 dark:text-pink-700 mr-4"
-              size={36}
-            />
-            <div className="flex flex-col flex-1">
-              <span className="text-xs text-pink-700 dark:text-pink-900 font-semibold">
-                Kindergarten Materials
-              </span>
-              <span className="text-2xl font-bold text-pink-700 dark:text-pink-900">
+          <div className="bg-gradient-to-r from-fuchsia-200 to-pink-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+            {/* Card Content */}
+            <div className="relative z-10">
+              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                Kindergarten
+              </h4>
+              <p className="text-2xl font-bold text-gray-800 mb-2">
                 {
                   filteredMaterials.filter(
                     (mat) => mat.gradeLevelName === "Kindergarten"
                   ).length
                 }
-              </span>
+              </p>
             </div>
+
+            {/* Icon in top-right corner */}
+            <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+              <FaPuzzlePiece className="text-fuchsia-600 text-2xl" />
+            </div>
+
+            {/* Description text */}
+            <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+              Kindergarten materials
+            </p>
           </div>
         </div>
       </div>

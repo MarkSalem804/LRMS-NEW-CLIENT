@@ -122,192 +122,286 @@ const Profile = () => {
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-          Profile Settings
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Manage your personal information and preferences
-        </p>
-      </div>
+  // Calculate profile completion percentage
+  const calculateProfileCompletion = () => {
+    const fields = [
+      userProfile.firstName,
+      userProfile.lastName,
+      userProfile.middleName,
+      userProfile.emailAddress,
+      userProfile.phoneNumber,
+      userProfile.employeeId,
+      userProfile.position,
+      userProfile.department,
+      userProfile.office,
+      userProfile.address,
+    ];
+    const filledFields = fields.filter(
+      (field) => field && field !== "N/A" && field.trim() !== ""
+    ).length;
+    return Math.round((filledFields / fields.length) * 100);
+  };
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-3">
-            <FaUser
-              className="text-primary-600 dark:text-primary-400"
-              size={24}
-            />
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-              Personal Information
-            </h2>
+  const completionPercentage = calculateProfileCompletion();
+  const avatarLetter = userProfile.firstName?.charAt(0)?.toUpperCase() || "U";
+
+  return (
+    <div className="space-y-6">
+      {/* Profile Header Card */}
+      <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-lg p-8 text-white">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          {/* Avatar */}
+          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-xl flex-shrink-0">
+            <span className="text-blue-700 font-bold text-4xl">
+              {avatarLetter}
+            </span>
           </div>
+
+          {/* User Info */}
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="text-3xl font-bold mb-2">
+              {userProfile.firstName} {userProfile.middleName}{" "}
+              {userProfile.lastName}
+            </h1>
+            <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-3">
+              <span className="inline-flex items-center px-3 py-1 bg-blue-500 rounded-full text-sm font-medium">
+                {userProfile.role || "User"}
+              </span>
+              {userProfile.employeeId && userProfile.employeeId !== "N/A" && (
+                <span className="inline-flex items-center px-3 py-1 bg-blue-500/50 rounded-full text-sm">
+                  ID: {userProfile.employeeId}
+                </span>
+              )}
+            </div>
+            <p className="text-blue-100 text-sm">
+              {userProfile.emailAddress || "No email provided"}
+            </p>
+          </div>
+
+          {/* Update Button */}
           <button
             onClick={handleOpenModal}
-            className="px-4 py-2 bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-800 text-white font-semibold rounded-md shadow transition-colors"
+            className="px-6 py-3 bg-white text-blue-700 font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
           >
             Update Profile
           </button>
         </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Profile Completion */}
+        <div className="mt-6 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium">Profile Completion</span>
+            <span className="text-sm font-bold">{completionPercentage}%</span>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-2">
+            <div
+              className="bg-white h-2 rounded-full transition-all duration-500"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Information Cards Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Personal Information Card */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FaUser className="text-blue-600 text-lg" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">
+              Personal Information
+            </h2>
+          </div>
+
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
                 First Name
               </label>
-              <input
-                type="text"
-                name="firstName"
-                value={userProfile.firstName || "N/A"}
-                readOnly={true}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-              />
+              <p className="text-base text-gray-900 font-medium">
+                {userProfile.firstName || "N/A"}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Last Name
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                value={userProfile.lastName || "N/A"}
-                readOnly={true}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
                 Middle Name
               </label>
-              <input
-                type="text"
-                name="middleName"
-                value={userProfile.middleName || "N/A"}
-                readOnly={true}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-              />
+              <p className="text-base text-gray-900 font-medium">
+                {userProfile.middleName || "N/A"}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email Address
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Last Name
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="text-gray-400" size={16} />
-                </div>
-                <input
-                  type="email"
-                  name="emailAddress"
-                  value={userProfile.emailAddress || "N/A"}
-                  readOnly={true}
-                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-                />
-              </div>
+              <p className="text-base text-gray-900 font-medium">
+                {userProfile.lastName || "N/A"}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Phone Number
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaPhone className="text-gray-400" size={16} />
-                </div>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={userProfile.phoneNumber || "N/A"}
-                  readOnly={true}
-                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Employee ID
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaIdCard className="text-gray-400" size={16} />
-                </div>
-                <input
-                  type="text"
-                  name="employeeId"
-                  value={userProfile.employeeId || "N/A"}
-                  readOnly={true}
-                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Position
-              </label>
-              <input
-                type="text"
-                name="position"
-                value={userProfile.position || "N/A"}
-                readOnly={true}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Department
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaBuilding className="text-gray-400" size={16} />
-                </div>
-                <input
-                  type="text"
-                  name="department"
-                  value={userProfile.department || "N/A"}
-                  readOnly={true}
-                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Office
-              </label>
-              <input
-                type="text"
-                name="office"
-                value={userProfile.office || "N/A"}
-                readOnly={true}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
                 Address
               </label>
-              <div className="relative">
-                <div className="absolute top-3 left-3">
-                  <FaMapMarkerAlt className="text-gray-400" size={16} />
-                </div>
-                <textarea
-                  name="address"
-                  value={userProfile.address || "N/A"}
-                  readOnly={true}
-                  rows="3"
-                  className="w-full pl-10 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none resize-none"
-                />
+              <div className="flex items-start gap-2">
+                <FaMapMarkerAlt className="text-gray-400 mt-1" size={14} />
+                <p className="text-base text-gray-900 font-medium">
+                  {userProfile.address || "N/A"}
+                </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Contact Information Card */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <FaEnvelope className="text-green-600 text-lg" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">
+              Contact Information
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Email Address
+              </label>
+              <div className="flex items-center gap-2">
+                <FaEnvelope className="text-gray-400" size={14} />
+                <p className="text-base text-gray-900 font-medium">
+                  {userProfile.emailAddress || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Phone Number
+              </label>
+              <div className="flex items-center gap-2">
+                <FaPhone className="text-gray-400" size={14} />
+                <p className="text-base text-gray-900 font-medium">
+                  {userProfile.phoneNumber || "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Work Information Card */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <FaBuilding className="text-purple-600 text-lg" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">
+              Work Information
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Employee ID
+              </label>
+              <div className="flex items-center gap-2">
+                <FaIdCard className="text-gray-400" size={14} />
+                <p className="text-base text-gray-900 font-medium">
+                  {userProfile.employeeId || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Position
+              </label>
+              <p className="text-base text-gray-900 font-medium">
+                {userProfile.position || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Department
+              </label>
+              <div className="flex items-center gap-2">
+                <FaBuilding className="text-gray-400" size={14} />
+                <p className="text-base text-gray-900 font-medium">
+                  {userProfile.department || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Office
+              </label>
+              <p className="text-base text-gray-900 font-medium">
+                {userProfile.office || "N/A"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions Card */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+              <FaUser className="text-orange-600 text-lg" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Quick Actions</h2>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={handleOpenModal}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-lg transition-colors"
+            >
+              <FaUser size={16} />
+              <span>Edit Profile</span>
+            </button>
+
+            <button className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                />
+              </svg>
+              <span>Change Password</span>
+            </button>
+
+            <button className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+              <span>Security Settings</span>
+            </button>
           </div>
         </div>
       </div>

@@ -516,374 +516,431 @@ const MaterialsManagement = () => {
   }, [viewMaterialUrl]);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-        <span className="flex items-center gap-2">
-          <FaDatabase size={32} /> MATERIALS MANAGEMENT
-        </span>
-      </h1>
-
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <button
-          onClick={() => setIsMetadataModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors"
-        >
-          <FaFileExcel />
-          <span>Upload Metadata</span>
-        </button>
-
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Search materials..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <FaSearch className="absolute left-3 top-3 text-gray-400" />
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-lg p-6 text-white">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold mb-1">Materials Management</h1>
+            <p className="text-blue-100 text-sm">
+              Manage learning materials and resources
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsMetadataModalOpen(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+            >
+              <FaFileExcel />
+              <span>Upload Metadata</span>
+            </button>
+          </div>
         </div>
-
-        <button
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-        >
-          <FaFilter />
-          <span>Filters</span>
-        </button>
       </div>
 
-      {/* Filter Panel */}
-      {isFilterOpen && (
-        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4 shadow-lg mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Add your filter components here similar to Materials.jsx */}
-            {/* Grade Level Filter */}
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="flex items-center justify-between">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Grade Level
-              </label>
-              <select
-                value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              >
-                <option value="">All Grades</option>
-                <option value="Kindergarten">Kindergarten</option>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
-                  <option key={grade} value={grade}>
-                    Grade {grade}
-                  </option>
-                ))}
-              </select>
+              <p className="text-xs font-semibold text-gray-500 uppercase">
+                Total Materials
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {materials.length}
+              </p>
             </div>
-
-            {/* Resource Type Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Resource Type
-              </label>
-              <select
-                value={selectedResourceType}
-                onChange={(e) => setSelectedResourceType(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              >
-                <option value="">All Types</option>
-                <option value="Module">Module</option>
-                <option value="Lesson Exemplar">Lesson Exemplar</option>
-                <option value="Activity Guide">Activity Guide</option>
-              </select>
-            </div>
-
-            {/* Learning Area Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Learning Area
-              </label>
-              <select
-                value={selectedArea}
-                onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              >
-                <option value="">All Areas</option>
-                <option value="MTB-MLE">MTB-MLE</option>
-                <option value="Mathematics">Mathematics</option>
-                <option value="Science">Science</option>
-                <option value="Filipino">Filipino</option>
-                <option value="Araling Panlipunan">Araling Panlipunan</option>
-                <option value="MAPEH">MAPEH</option>
-                <option value="Edukasyon sa Pagpapakatao">
-                  Edukasyon sa Pagpapakatao
-                </option>
-                <option value="English">English</option>
-              </select>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FaDatabase className="text-blue-600 text-xl" />
             </div>
           </div>
         </div>
-      )}
 
-      {/* Materials Table */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden border border-gray-200 dark:border-gray-700 mb-6">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-blue-500 dark:bg-blue-700 sticky top-0 z-10">
-              <tr>
-                <th className="px-6 py-3 w-48 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
-                  Title
-                </th>
-                <th className="px-6 py-3 w-32 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase">
+                With Files
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {materials.filter((m) => m.fileName).length}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <FaUpload className="text-green-600 text-xl" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase">
+                Filtered Results
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {filteredMaterials.length}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <FaFilter className="text-purple-600 text-xl" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase">
+                Current Page
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {currentPage} / {totalPages || 1}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <span className="text-orange-600 text-xl font-bold">#</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filter Section */}
+      <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="flex flex-col md:flex-row gap-4 mb-4">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search materials by title or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+            <FaSearch className="absolute left-3 top-4 text-gray-400" />
+          </div>
+
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+              isFilterOpen
+                ? "bg-blue-600 text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            <FaFilter />
+            <span>{isFilterOpen ? "Hide Filters" : "Show Filters"}</span>
+            {(selectedGrade || selectedArea || selectedResourceType) && (
+              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+            )}
+          </button>
+        </div>
+
+        {/* Filter Panel */}
+        {isFilterOpen && (
+          <div className="border-t border-gray-200 pt-6 mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-gray-900 uppercase">
+                Filter Options
+              </h3>
+              <button
+                onClick={() => {
+                  setSelectedGrade("");
+                  setSelectedArea("");
+                  setSelectedResourceType("");
+                  setSelectedComponent("");
+                  setSelectedCoreSubject("");
+                  setSelectedTrack("");
+                  setSelectedSubTrack("");
+                  setSelectedAppliedSubject("");
+                  setSelectedSpecializedSubject("");
+                }}
+                className="text-xs text-blue-600 hover:text-blue-700 font-semibold"
+              >
+                Clear All Filters
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Grade Level Filter */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">
                   Grade Level
-                </th>
-                <th className="px-6 py-3 w-40 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
-                  Learning Area
-                </th>
-                <th className="px-6 py-3 w-40 text-left text-xs font-medium text-white uppercase tracking-wider truncate">
+                </label>
+                <select
+                  value={selectedGrade}
+                  onChange={(e) => setSelectedGrade(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Grades</option>
+                  <option value="Kindergarten">Kindergarten</option>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
+                    <option key={grade} value={grade}>
+                      Grade {grade}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Resource Type Filter */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">
                   Resource Type
-                </th>
-                <th className="px-6 py-3 w-32 text-right text-xs font-medium text-white uppercase tracking-wider truncate">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {isLoading ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center">
-                    Loading materials...
-                  </td>
-                </tr>
-              ) : paginatedMaterials.length > 0 ? (
-                <>
-                  {paginatedMaterials.map((material) => (
-                    <tr
-                      key={material.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                </label>
+                <select
+                  value={selectedResourceType}
+                  onChange={(e) => setSelectedResourceType(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Types</option>
+                  <option value="Module">Module</option>
+                  <option value="Lesson Exemplar">Lesson Exemplar</option>
+                  <option value="Activity Guide">Activity Guide</option>
+                </select>
+              </div>
+
+              {/* Learning Area Filter */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">
+                  Learning Area
+                </label>
+                <select
+                  value={selectedArea}
+                  onChange={(e) => setSelectedArea(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Areas</option>
+                  <option value="MTB-MLE">MTB-MLE</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Science">Science</option>
+                  <option value="Filipino">Filipino</option>
+                  <option value="Araling Panlipunan">Araling Panlipunan</option>
+                  <option value="MAPEH">MAPEH</option>
+                  <option value="Edukasyon sa Pagpapakatao">
+                    Edukasyon sa Pagpapakatao
+                  </option>
+                  <option value="English">English</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Materials Cards Grid */}
+      <div>
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-600">Loading materials...</p>
+          </div>
+        ) : paginatedMaterials.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginatedMaterials.map((material) => (
+              <div
+                key={material.id}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-blue-300"
+              >
+                {/* Card Header */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-bold text-white truncate">
+                        {material.title}
+                      </h3>
+                      <p className="text-xs text-blue-100 truncate">
+                        {material.description || "No description"}
+                      </p>
+                    </div>
+                    {material.fileName && (
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg
+                          className="w-3 h-3 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase">
+                        Grade Level
+                      </p>
+                      <p className="text-sm text-gray-900 font-medium">
+                        {material.gradeLevelName || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase">
+                        Resource Type
+                      </p>
+                      <p className="text-sm text-gray-900 font-medium truncate">
+                        {material.typeName || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase">
+                      Learning Area / Subject
+                    </p>
+                    <p className="text-sm text-gray-900 font-medium truncate">
+                      {material.learningAreaName ||
+                        material.subjectTypeName ||
+                        "N/A"}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-2 border-t border-gray-200">
+                    <button
+                      onClick={() => handleViewMaterial(material.id)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium rounded-lg transition-colors"
+                      title="View Material"
+                      disabled={!material.fileName}
                     >
-                      <td className="px-6 py-4 w-48 whitespace-nowrap text-sm text-gray-900 dark:text-white h-16 truncate overflow-hidden">
-                        <div className="flex flex-col justify-center h-full w-44 h-12">
-                          <div className="font-medium truncate overflow-hidden whitespace-nowrap w-full">
-                            {material.title}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate overflow-hidden whitespace-nowrap min-h-[1.25rem] w-full">
-                            {material.description || "\u00A0"}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 w-32 h-16 whitespace-nowrap text-sm text-gray-900 dark:text-white truncate overflow-hidden">
-                        <div className="w-full h-full flex items-center truncate">
-                          {material.gradeLevelName || "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 w-40 h-16 whitespace-nowrap text-sm text-gray-900 dark:text-white truncate overflow-hidden">
-                        <div className="w-full h-full flex items-center truncate">
-                          {material.learningAreaName ||
-                            material.subjectTypeName ||
-                            "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 w-40 h-16 whitespace-nowrap text-sm text-gray-900 dark:text-white truncate overflow-hidden">
-                        <div className="w-full h-full flex items-center truncate">
-                          {material.typeName || "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 w-32 h-16 whitespace-nowrap text-right text-sm font-medium truncate overflow-hidden">
-                        <div className="flex justify-end gap-2 h-full items-center">
-                          <button
-                            onClick={() => handleViewMaterial(material.id)}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                            title="View Material"
-                          >
-                            <FaEye size={16} />
-                          </button>
-                          <Link
-                            to={`/materials/edit/${material.id}`}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            <FaEdit size={16} />
-                          </Link>
-                          <button
-                            // onClick={() => handleDelete(material.id)}
-                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                          >
-                            <FaTrash size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleUploadFile(material)}
-                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-                          >
-                            <FaUpload size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {/* Add empty rows if needed */}
-                  {Array.from({
-                    length: Math.max(
-                      0,
-                      itemsPerPage - paginatedMaterials.length
-                    ),
-                  }).map((_, index) => (
-                    <tr key={`empty-${index}`} className="h-16">
-                      <td
-                        className="px-6 py-4 w-48 whitespace-nowrap h-16 truncate overflow-hidden"
-                        colSpan="5"
-                      >
-                        <div className="h-full"></div>
-                      </td>
-                    </tr>
-                  ))}
-                </>
-              ) : (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
-                  >
-                    No materials found matching your criteria.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {/* Summary */}
-        <div className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-700">
-          Showing {paginatedMaterials.length} of {filteredMaterials.length}{" "}
-          materials
-          {searchTerm && ` matching "${searchTerm}"`}
-        </div>
+                      <FaEye size={14} />
+                      <span className="text-xs">View</span>
+                    </button>
+                    <Link
+                      to={`/materials/edit/${material.id}`}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 font-medium rounded-lg transition-colors"
+                      title="Edit"
+                    >
+                      <FaEdit size={14} />
+                      <span className="text-xs">Edit</span>
+                    </Link>
+                    <button
+                      onClick={() => handleUploadFile(material)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-600 font-medium rounded-lg transition-colors"
+                      title="Upload File"
+                    >
+                      <FaUpload size={14} />
+                      <span className="text-xs">Upload</span>
+                    </button>
+                    <button
+                      // onClick={() => handleDelete(material.id)}
+                      className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors disabled:opacity-50"
+                      title="Delete"
+                      disabled
+                    >
+                      <FaTrash size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+            <FaDatabase className="mx-auto text-gray-300 mb-4" size={64} />
+            <p className="text-lg text-gray-500 mb-2">No materials found</p>
+            <p className="text-sm text-gray-400">
+              {searchTerm ||
+              selectedGrade ||
+              selectedArea ||
+              selectedResourceType
+                ? "Try adjusting your search or filters"
+                : "Upload metadata to get started"}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
-      {totalPages > 0 && (
-        <div className="bg-blue-500 px-4 py-3 flex items-center justify-between border-t border-blue-600 sm:px-6">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-md text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-          </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-white">
-                Showing{" "}
-                <span className="font-medium">
-                  {filteredMaterials.length === 0
-                    ? 0
-                    : (currentPage - 1) * itemsPerPage + 1}
-                </span>{" "}
-                to{" "}
-                <span className="font-medium">
-                  {Math.min(
-                    currentPage * itemsPerPage,
-                    filteredMaterials.length
-                  )}
-                </span>{" "}
-                of{" "}
-                <span className="font-medium">{filteredMaterials.length}</span>{" "}
-                results
-              </p>
+      {totalPages > 1 && (
+        <div className="bg-white rounded-xl shadow-md px-6 py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-gray-600">
+              Showing{" "}
+              <span className="font-semibold text-gray-900">
+                {filteredMaterials.length === 0
+                  ? 0
+                  : (currentPage - 1) * itemsPerPage + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-semibold text-gray-900">
+                {Math.min(currentPage * itemsPerPage, filteredMaterials.length)}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-gray-900">
+                {filteredMaterials.length}
+              </span>{" "}
+              materials
             </div>
             <div>
-              <nav
-                className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                aria-label="Pagination"
-              >
-                {/* First Page Button */}
-                <button
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="sr-only">First</span>
-                  &laquo;
-                </button>
-
-                {/* Previous Page Button */}
+              <div className="flex gap-2">
+                {/* Previous Button */}
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="sr-only">Previous</span>
-                  &lsaquo;
+                  Previous
                 </button>
 
                 {/* Page Numbers */}
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((page) => {
-                    return (
-                      page === 1 ||
-                      page === totalPages ||
-                      Math.abs(currentPage - page) <= 1
-                    );
-                  })
-                  .map((page, index, array) => {
-                    if (index > 0 && array[index - 1] !== page - 1) {
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
                       return (
-                        <React.Fragment key={`ellipsis-${page}`}>
-                          <span className="relative inline-flex items-center px-4 py-2 border border-white bg-blue-500 text-sm font-medium text-white">
-                            ...
-                          </span>
-                          <button
-                            onClick={() => handlePageChange(page)}
-                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                              currentPage === page
-                                ? "z-10 bg-white border-white text-blue-500"
-                                : "bg-blue-500 border-white text-white hover:bg-blue-600"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        </React.Fragment>
+                        page === 1 ||
+                        page === totalPages ||
+                        Math.abs(currentPage - page) <= 1
                       );
-                    }
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          currentPage === page
-                            ? "z-10 bg-white border-white text-blue-500"
-                            : "bg-blue-500 border-white text-white hover:bg-blue-600"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
+                    })
+                    .map((page, index, array) => {
+                      if (index > 0 && array[index - 1] !== page - 1) {
+                        return (
+                          <React.Fragment key={`ellipsis-${page}`}>
+                            <span className="px-3 py-2 text-gray-500">...</span>
+                            <button
+                              onClick={() => handlePageChange(page)}
+                              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                currentPage === page
+                                  ? "bg-blue-600 text-white shadow-md"
+                                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          </React.Fragment>
+                        );
+                      }
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                            currentPage === page
+                              ? "bg-blue-600 text-white shadow-md"
+                              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                </div>
 
-                {/* Next Page Button */}
+                {/* Next Button */}
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center px-2 py-2 border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="sr-only">Next</span>
-                  &rsaquo;
+                  Next
                 </button>
-
-                {/* Last Page Button */}
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-white bg-blue-500 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="sr-only">Last</span>
-                  &raquo;
-                </button>
-              </nav>
+              </div>
             </div>
           </div>
         </div>

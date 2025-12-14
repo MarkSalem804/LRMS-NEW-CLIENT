@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardStats from "../../components/DashboardStats";
-import {
-  FaBook,
-  FaFileAlt,
-  FaPencilAlt,
-  FaChalkboardTeacher,
-  FaBookReader,
-} from "react-icons/fa";
+import DashboardActivityWidget from "../../components/DashboardActivityWidget";
 import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
 import { useStateContext } from "../../contexts/ContextProvider";
 import userService from "../../services/user-endpoints";
 import { getAllMaterials } from "../../services/lrms-endpoints";
 import { Link } from "react-router-dom";
+// Dashboard card icons
+import cubesIcon from "../../assets/cubes.png";
+import manuscriptIcon from "../../assets/manuscript.png";
+import googleSheetsIcon from "../../assets/google-sheets.png";
+import bookIcon from "../../assets/book.png";
+import modelIcon from "../../assets/model.png";
+import folderIcon from "../../assets/folder.png";
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -50,8 +51,12 @@ const Dashboard = () => {
             const type = (mat.typeName || "").toLowerCase();
             if (type.includes("module")) counts.modules++;
             else if (type.includes("manuscript")) counts.manuscripts++;
-            else if (type.includes("worksheet")) counts.worksheets++;
-            else if (type.includes("storybook")) counts.storybooks++;
+            else if (
+              type.includes("worksheet") ||
+              type.includes("learning activity sheet")
+            ) {
+              counts.worksheets++;
+            } else if (type.includes("storybook")) counts.storybooks++;
             else if (type.includes("exemplar")) counts.exemplars++;
           });
           setCategoryCounts(counts);
@@ -126,304 +131,417 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white mb-0">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          SDO - IMUS CITY iLeaRN DASHBOARD
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Sa serbisyong totoo at makatao, Bidang Imusenyo ang panalo
-        </p>
-      </motion.div>
-
+    <div className="space-y-6">
       {isLoading ? (
         <LoadingState />
       ) : (
         <>
-          {/* Quick Stats Card - Dynamic */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 mx-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <FaBook
-                className="text-primary-600 dark:text-primary-400"
-                size={20}
-              />
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Learning Materials Overview
-              </h2>
+          {/* Welcome Section */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-xl p-4 shadow-lg"
+          >
+            <h2 className="text-xl font-bold mb-1">
+              Welcome to ILeaRN Dashboard
+            </h2>
+            <p className="text-blue-100 text-sm">
+              Sa serbisyong totoo at makatao, Bidang Imusenyo ang panalo
+            </p>
+          </motion.div>
+
+          {/* Learning Materials Overview - Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="bg-gradient-to-r from-pink-200 to-rose-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+              {/* Card Content */}
+              <div className="relative z-10">
+                <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                  Modules
+                </h3>
+                <p className="text-2xl font-bold text-gray-800 mb-2">
+                  {categoryCounts.modules}
+                </p>
+              </div>
+
+              {/* Icon in top-right corner */}
+              <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+                <img
+                  src={cubesIcon}
+                  alt="Modules"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Description text */}
+              <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+                Learning modules
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {/* Solid gradient color cards */}
-              <div className="p-4 rounded-lg bg-gradient-to-r from-pink-500 to-pink-700 text-white transition-all duration-300 hover:shadow-md">
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <FaBook size={20} className="text-white" />
-                    <span className="font-medium text-white">Modules</span>
-                  </div>
-                  <span className="text-2xl font-bold">
-                    {categoryCounts.modules}
-                  </span>
-                  <span className="text-sm opacity-75">materials</span>
-                </div>
+
+            <div className="bg-gradient-to-r from-blue-200 to-cyan-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+              {/* Card Content */}
+              <div className="relative z-10">
+                <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                  Manuscripts
+                </h3>
+                <p className="text-2xl font-bold text-gray-800 mb-2">
+                  {categoryCounts.manuscripts}
+                </p>
               </div>
-              <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white transition-all duration-300 hover:shadow-md">
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <FaFileAlt size={20} className="text-white" />
-                    <span className="font-medium text-white">Manuscripts</span>
-                  </div>
-                  <span className="text-2xl font-bold">
-                    {categoryCounts.manuscripts}
-                  </span>
-                  <span className="text-sm opacity-75">materials</span>
-                </div>
+
+              {/* Icon in top-right corner */}
+              <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+                <img
+                  src={manuscriptIcon}
+                  alt="Manuscripts"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <div className="p-4 rounded-lg bg-gradient-to-r from-green-500 to-green-700 text-white transition-all duration-300 hover:shadow-md">
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <FaPencilAlt size={20} className="text-white" />
-                    <span className="font-medium text-white">
-                      Learning Worksheets
-                    </span>
-                  </div>
-                  <span className="text-2xl font-bold">
-                    {categoryCounts.worksheets}
-                  </span>
-                  <span className="text-sm opacity-75">materials</span>
-                </div>
+
+              {/* Description text */}
+              <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+                Manuscript materials
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-green-200 to-emerald-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+              {/* Card Content */}
+              <div className="relative z-10">
+                <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                  Worksheets
+                </h3>
+                <p className="text-2xl font-bold text-gray-800 mb-2">
+                  {categoryCounts.worksheets}
+                </p>
               </div>
-              <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500 to-purple-700 text-white transition-all duration-300 hover:shadow-md">
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <FaBookReader size={20} className="text-white" />
-                    <span className="font-medium text-white">Storybooks</span>
-                  </div>
-                  <span className="text-2xl font-bold">
-                    {categoryCounts.storybooks}
-                  </span>
-                  <span className="text-sm opacity-75">materials</span>
-                </div>
+
+              {/* Icon in top-right corner */}
+              <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+                <img
+                  src={googleSheetsIcon}
+                  alt="Worksheets"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <div className="p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-white transition-all duration-300 hover:shadow-md">
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <FaChalkboardTeacher size={20} className="text-white" />
-                    <span className="font-medium text-white">
-                      Lesson Exemplars
-                    </span>
-                  </div>
-                  <span className="text-2xl font-bold">
-                    {categoryCounts.exemplars}
-                  </span>
-                  <span className="text-sm opacity-75">materials</span>
-                </div>
+
+              {/* Description text */}
+              <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+                Learning activity sheets
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-purple-200 to-violet-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+              {/* Card Content */}
+              <div className="relative z-10">
+                <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                  Storybooks
+                </h3>
+                <p className="text-2xl font-bold text-gray-800 mb-2">
+                  {categoryCounts.storybooks}
+                </p>
               </div>
+
+              {/* Icon in top-right corner */}
+              <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+                <img
+                  src={bookIcon}
+                  alt="Storybooks"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Description text */}
+              <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+                Story materials
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-orange-200 to-yellow-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 cursor-pointer group relative overflow-hidden">
+              {/* Card Content */}
+              <div className="relative z-10">
+                <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                  Exemplars
+                </h3>
+                <p className="text-2xl font-bold text-gray-800 mb-2">
+                  {categoryCounts.exemplars}
+                </p>
+              </div>
+
+              {/* Icon in top-right corner */}
+              <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+                <img
+                  src={modelIcon}
+                  alt="Exemplars"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Description text */}
+              <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+                Lesson exemplars
+              </p>
             </div>
           </div>
 
           {/* Data Overview Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 mx-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <FaFileAlt
-                className="text-primary-600 dark:text-primary-400"
-                size={20}
-              />
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-                Data Overview
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-              <div className="bg-[#002451] rounded-lg shadow p-4 flex flex-row items-center">
-                <FaBook className="text-white mr-4" size={36} />
-                <div className="flex flex-col flex-1">
-                  <span className="text-xs text-white font-semibold">
-                    Materials Metadata Uploaded
-                  </span>
-                  <span className="text-2xl font-bold text-white">
-                    {categoryCounts.modules +
-                      categoryCounts.manuscripts +
-                      categoryCounts.worksheets +
-                      categoryCounts.storybooks +
-                      categoryCounts.exemplars}
-                  </span>
-                  {/* Progress Bar */}
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs text-white mb-1">
-                      <span>Progress</span>
-                      <span>
-                        {Math.round(
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gradient-to-r from-blue-200 to-indigo-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 group relative overflow-hidden">
+              {/* Card Content */}
+              <div className="relative z-10">
+                <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                  Materials Metadata Uploaded
+                </h4>
+                <p className="text-3xl font-bold text-gray-800 mb-2">
+                  {categoryCounts.modules +
+                    categoryCounts.manuscripts +
+                    categoryCounts.worksheets +
+                    categoryCounts.storybooks +
+                    categoryCounts.exemplars}
+                </p>
+                <div className="mt-4">
+                  <div className="flex justify-between text-xs text-gray-600 mb-1">
+                    <span>Progress</span>
+                    <span>
+                      {Math.round(
+                        ((categoryCounts.modules +
+                          categoryCounts.manuscripts +
+                          categoryCounts.worksheets +
+                          categoryCounts.storybooks +
+                          categoryCounts.exemplars) /
+                          100) *
+                          100
+                      )}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/90 backdrop-blur-sm rounded-full h-2">
+                    <motion.div
+                      className="bg-blue-600 h-2 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${Math.min(
                           ((categoryCounts.modules +
                             categoryCounts.manuscripts +
                             categoryCounts.worksheets +
                             categoryCounts.storybooks +
                             categoryCounts.exemplars) /
                             100) *
-                            100
-                        )}
-                        %
-                      </span>
-                    </div>
-                    <div className="w-full bg-blue-200 rounded-full h-2">
-                      <motion.div
-                        className="bg-blue-600 h-2 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{
-                          width: `${Math.min(
-                            ((categoryCounts.modules +
-                              categoryCounts.manuscripts +
-                              categoryCounts.worksheets +
-                              categoryCounts.storybooks +
-                              categoryCounts.exemplars) /
-                              100) *
-                              100,
-                            100
-                          )}%`,
-                        }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                      />
-                    </div>
-                    <span className="text-xs text-white mt-1">
-                      Target: 100 materials
-                    </span>
+                            100,
+                          100
+                        )}%`,
+                      }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                    />
                   </div>
                 </div>
               </div>
-              <div className="bg-[#002451] rounded-lg shadow p-4 flex flex-row items-center">
-                <FaFileAlt className="text-white mr-4" size={36} />
-                <div className="flex flex-col flex-1">
-                  <span className="text-xs text-white font-semibold">
-                    Metadata File Uploaded
-                  </span>
-                  {(() => {
-                    const targetCount =
-                      categoryCounts.modules +
-                      categoryCounts.manuscripts +
-                      categoryCounts.worksheets +
-                      categoryCounts.storybooks +
-                      categoryCounts.exemplars;
-                    const uploadedCount = allMaterials.filter(
+
+              {/* Icon in top-right corner */}
+              <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+                <img
+                  src={folderIcon}
+                  alt="Folder"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Description text */}
+              <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+                Metadata records
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-teal-200 to-cyan-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 group relative overflow-hidden">
+              {/* Card Content */}
+              <div className="relative z-10">
+                <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                  Files Uploaded
+                </h4>
+                <p className="text-3xl font-bold text-gray-800 mb-2">
+                  {
+                    allMaterials.filter(
                       (mat) => mat.fileName && mat.fileName.trim() !== ""
-                    ).length;
-                    const percent =
-                      targetCount > 0
-                        ? Math.round((uploadedCount / targetCount) * 100)
-                        : 0;
-                    return (
-                      <>
-                        <span className="text-2xl font-bold text-white">
-                          {uploadedCount} / {targetCount}
-                        </span>
-                        {/* Progress Bar */}
-                        <div className="mt-2">
-                          <div className="flex justify-between text-xs text-white mb-1">
-                            <span>Progress</span>
-                            <span>{percent}%</span>
-                          </div>
-                          <div className="w-full bg-green-200 rounded-full h-2">
-                            <motion.div
-                              className="bg-green-600 h-2 rounded-full"
-                              initial={{ width: 0 }}
-                              animate={{
-                                width: `${Math.min(percent, 100)}%`,
-                              }}
-                              transition={{ duration: 1, ease: "easeOut" }}
-                            />
-                          </div>
-                          <span className="text-xs text-white mt-1">
-                            Target: {targetCount} files
-                          </span>
-                        </div>
-                      </>
-                    );
-                  })()}
+                    ).length
+                  }{" "}
+                  /{" "}
+                  {categoryCounts.modules +
+                    categoryCounts.manuscripts +
+                    categoryCounts.worksheets +
+                    categoryCounts.storybooks +
+                    categoryCounts.exemplars}
+                </p>
+                <div className="mt-4">
+                  <div className="flex justify-between text-xs text-gray-600 mb-1">
+                    <span>Progress</span>
+                    <span>
+                      {(() => {
+                        const targetCount =
+                          categoryCounts.modules +
+                          categoryCounts.manuscripts +
+                          categoryCounts.worksheets +
+                          categoryCounts.storybooks +
+                          categoryCounts.exemplars;
+                        const uploadedCount = allMaterials.filter(
+                          (mat) => mat.fileName && mat.fileName.trim() !== ""
+                        ).length;
+                        return targetCount > 0
+                          ? Math.round((uploadedCount / targetCount) * 100)
+                          : 0;
+                      })()}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/90 backdrop-blur-sm rounded-full h-2">
+                    <motion.div
+                      className="bg-green-600 h-2 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${(() => {
+                          const targetCount =
+                            categoryCounts.modules +
+                            categoryCounts.manuscripts +
+                            categoryCounts.worksheets +
+                            categoryCounts.storybooks +
+                            categoryCounts.exemplars;
+                          const uploadedCount = allMaterials.filter(
+                            (mat) => mat.fileName && mat.fileName.trim() !== ""
+                          ).length;
+                          return targetCount > 0
+                            ? Math.min(
+                                Math.round((uploadedCount / targetCount) * 100),
+                                100
+                              )
+                            : 0;
+                        })()}%`,
+                      }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                    />
+                  </div>
                 </div>
               </div>
+
+              {/* Icon in top-right corner */}
+              <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+                <img
+                  src={folderIcon}
+                  alt="Files"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Description text */}
+              <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+                Uploaded documents
+              </p>
             </div>
           </div>
 
-          <DashboardStats />
+          {/* Dashboard Stats and Activity Widget Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Stats Chart - Takes 2/3 of the width */}
+            <div className="lg:col-span-2">
+              <DashboardStats />
+            </div>
+
+            {/* Activity Widget - Takes 1/3 of the width */}
+            <div className="lg:col-span-1">
+              <DashboardActivityWidget />
+            </div>
+          </div>
 
           {/* Most Recent Materials Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8 mx-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <FaBook
-                className="text-primary-600 dark:text-primary-400"
-                size={20}
-              />
-              <h2 className="text-lg font-semibold text-black">
-                Most Recent Materials
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">
+              Most Recent Materials
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 {
                   name: "Kindergarten",
-                  color: "bg-purple-100",
-                  text: "text-white",
-                  headerBg: "#9333ea",
+                  color: "from-purple-200 to-violet-200",
+                  icon: "🎨",
                 },
                 {
                   name: "Elementary",
-                  color: "bg-pink-100",
-                  text: "text-white",
-                  headerBg: "#db2777",
+                  color: "from-pink-200 to-rose-200",
+                  icon: "📚",
                 },
                 {
                   name: "Junior High School",
-                  color: "bg-blue-100",
-                  text: "text-white",
-                  headerBg: "#2563eb",
+                  color: "from-blue-200 to-cyan-200",
+                  icon: "🎓",
                 },
                 {
                   name: "Senior High School",
-                  color: "bg-green-100",
-                  text: "text-white",
-                  headerBg: "#16a34a",
+                  color: "from-green-200 to-emerald-200",
+                  icon: "🎯",
                 },
               ].map((section) => {
                 const recent = getRecentMaterialsByLevel(section.name);
                 return (
                   <div
                     key={section.name}
-                    className={`rounded-lg shadow p-4 ${section.color}`}
+                    className={`bg-gradient-to-r ${section.color} rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5 group relative overflow-hidden`}
                   >
-                    <h3
-                      className={`text-md font-bold mb-3 ${section.text} px-3 py-1 text-center w-full`}
-                      style={{ backgroundColor: section.headerBg || undefined }}
-                    >
-                      {section.name}
-                    </h3>
-                    <ul className="space-y-2">
-                      {recent.slice(0, 10).map((mat) => (
-                        <li
-                          key={mat.id}
-                          className="flex flex-col border-b last:border-b-0 pb-2 text-black"
-                        >
-                          <span className="font-semibold truncate text-black">
-                            {mat.title}
-                          </span>
-                          <span className="text-xs text-black">
-                            {mat.gradeLevelName} &middot;{" "}
-                            {mat.learningAreaName || mat.subjectTypeName}
-                          </span>
-                          <span className="text-xs text-black">
-                            {mat.uploadedAt
-                              ? new Date(mat.uploadedAt).toLocaleDateString()
-                              : ""}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                    {recent.length > 10 && (
-                      <div className="mt-4 flex justify-center">
+                    {/* Card Header */}
+                    <div className="relative z-10 mb-4">
+                      <h4 className="text-sm font-bold text-gray-800 mb-1">
+                        {section.name}
+                      </h4>
+                      <div className="inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        <span className="text-lg">{section.icon}</span>
+                        <span>{recent.length} materials</span>
+                      </div>
+                    </div>
+
+                    {/* Materials List */}
+                    <div className="relative z-10 space-y-2 max-h-56 overflow-y-auto">
+                      {recent.length > 0 ? (
+                        recent.slice(0, 5).map((mat) => (
+                          <div
+                            key={mat.id}
+                            className="bg-white/90 backdrop-blur-sm p-3 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer"
+                          >
+                            <p className="font-semibold text-xs text-gray-900 truncate mb-1">
+                              {mat.title}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <span className="truncate">
+                                {mat.learningAreaName || mat.subjectTypeName}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {mat.uploadedAt
+                                ? new Date(mat.uploadedAt).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    }
+                                  )
+                                : ""}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg text-center">
+                          <p className="text-xs text-gray-500">
+                            No materials yet
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* View All Button */}
+                    {recent.length > 5 && (
+                      <div className="mt-4 relative z-10">
                         <Link
                           to="/admin/materials-management"
-                          className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
+                          className="block w-full text-center bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 font-semibold text-xs py-2 px-4 rounded-lg transition-all duration-200 hover:shadow-md"
                         >
-                          Proceed to the Materials Management
+                          View All ({recent.length}) →
                         </Link>
                       </div>
                     )}
