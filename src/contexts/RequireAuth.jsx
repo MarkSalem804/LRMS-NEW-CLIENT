@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useStateContext } from "./ContextProvider";
 
-export default function RequireAuth({ allowedRoles }) {
+export default function RequireAuth({ allowedRoles = null }) {
   const { auth } = useStateContext();
   const location = useLocation();
 
@@ -25,10 +25,6 @@ export default function RequireAuth({ allowedRoles }) {
     <Navigate to="/" state={{ from: location }} replace />
   );
 }
-
-RequireAuth.defaultProps = {
-  allowedRoles: null,
-};
 
 RequireAuth.propTypes = {
   allowedRoles: PropTypes.oneOfType([

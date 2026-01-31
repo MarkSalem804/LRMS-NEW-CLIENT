@@ -1,39 +1,72 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import {
-  FaSearch,
-  FaFilter,
-  FaEdit,
-  FaTrash,
-  FaUpload,
-  FaFileExcel,
-  FaDatabase,
-  FaEye,
-  // FaTimes,
-  // FaDownload,
-} from "react-icons/fa";
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Upload,
+  FileSpreadsheet,
+  Database,
+  Eye,
+  X,
+  ChevronDown,
+} from "lucide-react";
+import { Button } from "@/components/shadcn-components/ui/button";
+import { Input } from "@/components/shadcn-components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn-components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shadcn-components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/shadcn-components/ui/dialog";
+import { toast } from "sonner";
 import {
   getAllMaterials,
   uploadMaterialFile,
   uploadMaterialsMetadata,
   viewMaterialFile,
   getMaterialDetails,
+  getAllTypes,
+  getAllLearningAreas,
+  getAllGradeLevels,
 } from "../../../services/lrms-endpoints";
-import { Link } from "react-router-dom";
-import Swal from "sweetalert2";
-import Modal from "react-modal";
+import { Link, useLocation } from "react-router-dom";
 
 const MaterialsManagement = () => {
+  const location = useLocation();
   const [materials, setMaterials] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
   const [selectedComponent, setSelectedComponent] = useState("");
   const [selectedResourceType, setSelectedResourceType] = useState("");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Fixed number of items per page
+
+  // Filter options
+  const [resourceTypes, setResourceTypes] = useState([]);
+  const [learningAreas, setLearningAreas] = useState([]);
+  const [gradeLevels, setGradeLevels] = useState([]);
 
   // Filter states for SHS
   const [selectedCoreSubject, setSelectedCoreSubject] = useState("");
@@ -61,25 +94,55 @@ const MaterialsManagement = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewMaterialTitle, setViewMaterialTitle] = useState("");
 
-  // Fetch materials on component mount
+  // State for filters dialog
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+
+  // Sync selected resource type from sidebar deep-link: /materials/management?type=<TypeName>
   useEffect(() => {
-    const fetchMaterials = async () => {
+    const typeFromQuery =
+      new URLSearchParams(location.search).get("type") || "";
+    if (typeFromQuery !== selectedResourceType) {
+      setSelectedResourceType(typeFromQuery);
+      setCurrentPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+
+  // Fetch materials and filter options on component mount
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await getAllMaterials();
-        if (response.success) {
-          setMaterials(response.data);
+        // Fetch materials
+        const materialsResponse = await getAllMaterials();
+        if (materialsResponse.success) {
+          setMaterials(materialsResponse.data);
         } else {
-          console.error("Failed to fetch materials:", response.message);
+          console.error(
+            "Failed to fetch materials:",
+            materialsResponse.message
+          );
         }
+
+        // Fetch filter options
+        const [typesResponse, areasResponse, gradesResponse] =
+          await Promise.all([
+            getAllTypes(),
+            getAllLearningAreas(),
+            getAllGradeLevels(),
+          ]);
+
+        setResourceTypes(typesResponse.data || typesResponse || []);
+        setLearningAreas(areasResponse.data || areasResponse || []);
+        setGradeLevels(gradesResponse.data || gradesResponse || []);
       } catch (error) {
-        console.error("Error fetching materials:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMaterials();
+    fetchData();
   }, []);
 
   // Filter materials based on search term and filters
@@ -102,14 +165,7 @@ const MaterialsManagement = () => {
 
     // Grade filtering
     if (selectedGrade) {
-      if (selectedGrade === "Kindergarten") {
-        if (material.gradeLevelName !== "Kindergarten") return false;
-      } else {
-        const materialGrade = parseInt(
-          material.gradeLevelName?.replace("Grade ", "")
-        );
-        if (materialGrade !== parseInt(selectedGrade)) return false;
-      }
+      if (material.gradeLevelName !== selectedGrade) return false;
     }
 
     // Learning Area filtering
@@ -236,46 +292,12 @@ const MaterialsManagement = () => {
 
           // Show success notification with duplicate info if any
           if (response.duplicates && response.duplicates.length > 0) {
-            // console.log(
-            //   "[Metadata Upload] Showing warning notification for duplicates"
-            // );
-            Swal.fire({
-              icon: "warning",
-              title: "Upload Complete",
-              text: `Successfully uploaded ${response.totalUploaded} materials. ${response.totalDuplicates} duplicates were skipped.`,
-              toast: true,
-              position: "bottom-end",
-              showConfirmButton: false,
-              timer: 5000,
-              timerProgressBar: true,
-              background: "#FFA500",
-              color: "#fff",
-              iconColor: "#fff",
-              customClass: {
-                popup: "colored-toast",
-                title: "colored-toast-title",
-                htmlContainer: "colored-toast-content",
-              },
+            toast.warning("Upload Complete", {
+              description: `Successfully uploaded ${response.totalUploaded} materials. ${response.totalDuplicates} duplicates were skipped.`,
             });
           } else {
-            // console.log("[Metadata Upload] Showing success notification");
-            Swal.fire({
-              icon: "success",
-              title: "Success!",
-              text: `Successfully uploaded ${response.totalUploaded} materials!`,
-              toast: true,
-              position: "bottom-end",
-              showConfirmButton: false,
-              timer: 3000,
-              timerProgressBar: true,
-              background: "#4CAF50",
-              color: "#fff",
-              iconColor: "#fff",
-              customClass: {
-                popup: "colored-toast",
-                title: "colored-toast-title",
-                htmlContainer: "colored-toast-content",
-              },
+            toast.success("Upload Successful", {
+              description: `Successfully uploaded ${response.totalUploaded} materials!`,
             });
           }
         } else {
@@ -287,25 +309,8 @@ const MaterialsManagement = () => {
       } else {
         console.error("[Metadata Upload] Upload failed:", response.message);
         setMetadataError(response.message || "Failed to upload metadata");
-        // Show error notification
-        // console.log("[Metadata Upload] Showing error notification");
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: response.message || "Failed to upload metadata",
-          toast: true,
-          position: "bottom-end",
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          background: "#f44336",
-          color: "#fff",
-          iconColor: "#fff",
-          customClass: {
-            popup: "colored-toast",
-            title: "colored-toast-title",
-            htmlContainer: "colored-toast-content",
-          },
+        toast.error("Upload Failed", {
+          description: response.message || "Failed to upload metadata",
         });
       }
     } catch (error) {
@@ -317,27 +322,9 @@ const MaterialsManagement = () => {
       setMetadataError(
         error.message || "An error occurred while uploading the metadata"
       );
-      // Show error notification
-      // console.log(
-      //   "[Metadata Upload] Showing error notification for caught error"
-      // );
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.message || "An error occurred while uploading the metadata",
-        toast: true,
-        position: "bottom-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        background: "#f44336",
-        color: "#fff",
-        iconColor: "#fff",
-        customClass: {
-          popup: "colored-toast",
-          title: "colored-toast-title",
-          htmlContainer: "colored-toast-content",
-        },
+      toast.error("Upload Failed", {
+        description:
+          error.message || "An error occurred while uploading the metadata",
       });
     } finally {
       setIsMetadataUploading(false);
@@ -400,25 +387,8 @@ const MaterialsManagement = () => {
         if (updatedResponse.success) {
           // console.log("[File Upload] Materials list refreshed successfully");
           setMaterials(updatedResponse.data);
-          // Show success notification
-          // console.log("[File Upload] Showing success notification");
-          Swal.fire({
-            icon: "success",
-            title: "Success!",
-            text: "File uploaded successfully!",
-            toast: true,
-            position: "bottom-end",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            background: "#4CAF50",
-            color: "#fff",
-            iconColor: "#fff",
-            customClass: {
-              popup: "colored-toast",
-              title: "colored-toast-title",
-              htmlContainer: "colored-toast-content",
-            },
+          toast.success("File Uploaded", {
+            description: "File uploaded successfully!",
           });
         } else {
           console.error(
@@ -429,25 +399,8 @@ const MaterialsManagement = () => {
       } else {
         console.error("[File Upload] Upload failed:", response.message);
         setUploadError(response.message || "Failed to upload file");
-        // Show error notification
-        // console.log("[File Upload] Showing error notification");
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: response.message || "Failed to upload file",
-          toast: true,
-          position: "bottom-end",
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          background: "#f44336",
-          color: "#fff",
-          iconColor: "#fff",
-          customClass: {
-            popup: "colored-toast",
-            title: "colored-toast-title",
-            htmlContainer: "colored-toast-content",
-          },
+        toast.error("Upload Failed", {
+          description: response.message || "Failed to upload file",
         });
       }
     } catch (error) {
@@ -459,25 +412,9 @@ const MaterialsManagement = () => {
       setUploadError(
         error.message || "An error occurred while uploading the file"
       );
-      // Show error notification
-      // console.log("[File Upload] Showing error notification for caught error");
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.message || "An error occurred while uploading the file",
-        toast: true,
-        position: "bottom-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        background: "#f44336",
-        color: "#fff",
-        iconColor: "#fff",
-        customClass: {
-          popup: "colored-toast",
-          title: "colored-toast-title",
-          htmlContainer: "colored-toast-content",
-        },
+      toast.error("Upload Failed", {
+        description:
+          error.message || "An error occurred while uploading the file",
       });
     } finally {
       setIsUploading(false);
@@ -498,10 +435,8 @@ const MaterialsManagement = () => {
       setIsViewModalOpen(true);
     } catch (error) {
       console.error("Error getting material details:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to get material details",
+      toast.error("Error", {
+        description: "Failed to get material details",
       });
     }
   };
@@ -517,572 +452,578 @@ const MaterialsManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-lg p-6 text-white">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold mb-1">Materials Management</h1>
-            <p className="text-blue-100 text-sm">
-              Manage learning materials and resources
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Materials Management
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Manage learning materials and resources
+          </p>
+        </div>
+        <Button onClick={() => setIsMetadataModalOpen(true)} className="gap-2">
+          <FileSpreadsheet className="h-4 w-4" />
+          Upload Metadata
+        </Button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Total Materials Card */}
+        <div className="bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 relative overflow-hidden group cursor-pointer">
+          <div className="relative z-10">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Total Materials
+            </h3>
+            <p className="text-2xl font-bold text-gray-800 mb-2">
+              {materials.length}
             </p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setIsMetadataModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-            >
-              <FaFileExcel />
-              <span>Upload Metadata</span>
-            </button>
+          <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+            <Database className="w-8 h-8 text-blue-600" />
           </div>
+          <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+            All materials
+          </p>
+        </div>
+
+        {/* With Files Card */}
+        <div className="bg-gradient-to-r from-green-200 to-blue-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 relative overflow-hidden group cursor-pointer">
+          <div className="relative z-10">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              With Files
+            </h3>
+            <p className="text-2xl font-bold text-gray-800 mb-2">
+              {materials.filter((m) => m.fileName).length}
+            </p>
+          </div>
+          <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+            <Upload className="w-8 h-8 text-green-600" />
+          </div>
+          <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+            Materials with files
+          </p>
+        </div>
+
+        {/* Without Files Card */}
+        <div className="bg-gradient-to-r from-orange-200 to-yellow-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 relative overflow-hidden group cursor-pointer">
+          <div className="relative z-10">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Without Files
+            </h3>
+            <p className="text-2xl font-bold text-gray-800 mb-2">
+              {materials.filter((m) => !m.fileName).length}
+            </p>
+          </div>
+          <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+            <Database className="w-8 h-8 text-orange-600" />
+          </div>
+          <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+            Materials without files
+          </p>
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-md p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase">
-                Total Materials
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {materials.length}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FaDatabase className="text-blue-600 text-xl" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase">
-                With Files
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {materials.filter((m) => m.fileName).length}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <FaUpload className="text-green-600 text-xl" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase">
-                Filtered Results
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {filteredMaterials.length}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <FaFilter className="text-purple-600 text-xl" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase">
-                Current Page
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {currentPage} / {totalPages || 1}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <span className="text-orange-600 text-xl font-bold">#</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Filter Section */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
-          <div className="relative flex-1">
-            <input
-              type="text"
+      {/* Search Bar and Filters */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
               placeholder="Search materials by title or description..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-10"
             />
-            <FaSearch className="absolute left-3 top-4 text-gray-400" />
           </div>
-
-          <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-              isFilterOpen
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <FaFilter />
-            <span>{isFilterOpen ? "Hide Filters" : "Show Filters"}</span>
-            {(selectedGrade || selectedArea || selectedResourceType) && (
-              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-            )}
-          </button>
+          <div className="text-sm text-gray-600">
+            Showing{" "}
+            {filteredMaterials.length === 0
+              ? 0
+              : (currentPage - 1) * itemsPerPage + 1}
+            -{Math.min(currentPage * itemsPerPage, filteredMaterials.length)} of{" "}
+            {filteredMaterials.length} material(s)
+          </div>
         </div>
 
-        {/* Filter Panel */}
-        {isFilterOpen && (
-          <div className="border-t border-gray-200 pt-6 mt-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-gray-900 uppercase">
-                Filter Options
-              </h3>
-              <button
-                onClick={() => {
-                  setSelectedGrade("");
-                  setSelectedArea("");
-                  setSelectedResourceType("");
-                  setSelectedComponent("");
-                  setSelectedCoreSubject("");
-                  setSelectedTrack("");
-                  setSelectedSubTrack("");
-                  setSelectedAppliedSubject("");
-                  setSelectedSpecializedSubject("");
-                }}
-                className="text-xs text-blue-600 hover:text-blue-700 font-semibold"
-              >
-                Clear All Filters
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Grade Level Filter */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">
-                  Grade Level
-                </label>
-                <select
-                  value={selectedGrade}
-                  onChange={(e) => setSelectedGrade(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">All Grades</option>
-                  <option value="Kindergarten">Kindergarten</option>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
-                    <option key={grade} value={grade}>
-                      Grade {grade}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Resource Type Filter */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">
-                  Resource Type
-                </label>
-                <select
-                  value={selectedResourceType}
-                  onChange={(e) => setSelectedResourceType(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">All Types</option>
-                  <option value="Module">Module</option>
-                  <option value="Lesson Exemplar">Lesson Exemplar</option>
-                  <option value="Activity Guide">Activity Guide</option>
-                </select>
-              </div>
-
-              {/* Learning Area Filter */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase mb-2">
-                  Learning Area
-                </label>
-                <select
-                  value={selectedArea}
-                  onChange={(e) => setSelectedArea(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">All Areas</option>
-                  <option value="MTB-MLE">MTB-MLE</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Science">Science</option>
-                  <option value="Filipino">Filipino</option>
-                  <option value="Araling Panlipunan">Araling Panlipunan</option>
-                  <option value="MAPEH">MAPEH</option>
-                  <option value="Edukasyon sa Pagpapakatao">
-                    Edukasyon sa Pagpapakatao
-                  </option>
-                  <option value="English">English</option>
-                </select>
-              </div>
-            </div>
+        {/* Filters Trigger */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            {/* <Filter className="h-4 w-4 text-gray-500" />
+            <span className="font-medium text-gray-700">Filters</span> */}
           </div>
-        )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setIsFilterDialogOpen(true)}
+          >
+            <Filter className="h-4 w-4" />
+            Open filters
+          </Button>
+        </div>
       </div>
 
-      {/* Materials Cards Grid */}
-      <div>
+      {/* Materials Table */}
+      <div className="border rounded-lg bg-white">
         {isLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading materials...</p>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-600">Loading materials...</div>
           </div>
-        ) : paginatedMaterials.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {paginatedMaterials.map((material) => (
-              <div
-                key={material.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-blue-300"
-              >
-                {/* Card Header */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-white truncate">
-                        {material.title}
-                      </h3>
-                      <p className="text-xs text-blue-100 truncate">
-                        {material.description || "No description"}
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Grade Level</TableHead>
+                <TableHead>Resource Type</TableHead>
+                <TableHead>Learning Area / Subject</TableHead>
+                <TableHead>File Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedMaterials.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-8 text-gray-500"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Database className="h-12 w-12 text-gray-300" />
+                      <p className="text-lg font-medium">No materials found</p>
+                      <p className="text-sm text-gray-400">
+                        {searchTerm ||
+                        selectedGrade ||
+                        selectedArea ||
+                        selectedResourceType
+                          ? "Try adjusting your search or filters"
+                          : "Upload metadata to get started"}
                       </p>
                     </div>
-                    {material.fileName && (
-                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg
-                          className="w-3 h-3 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedMaterials.map((material) => (
+                  <TableRow key={material.id}>
+                    <TableCell className="font-medium max-w-[200px]">
+                      <div className="truncate" title={material.title}>
+                        {material.title || "N/A"}
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-4 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase">
-                        Grade Level
-                      </p>
-                      <p className="text-sm text-gray-900 font-medium">
-                        {material.gradeLevelName || "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase">
-                        Resource Type
-                      </p>
-                      <p className="text-sm text-gray-900 font-medium truncate">
-                        {material.typeName || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase">
-                      Learning Area / Subject
-                    </p>
-                    <p className="text-sm text-gray-900 font-medium truncate">
+                    </TableCell>
+                    <TableCell className="max-w-[250px]">
+                      <div className="truncate" title={material.description}>
+                        {material.description || "No description"}
+                      </div>
+                    </TableCell>
+                    <TableCell>{material.gradeLevelName || "N/A"}</TableCell>
+                    <TableCell>{material.typeName || "N/A"}</TableCell>
+                    <TableCell>
                       {material.learningAreaName ||
                         material.subjectTypeName ||
                         "N/A"}
-                    </p>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-2 border-t border-gray-200">
-                    <button
-                      onClick={() => handleViewMaterial(material.id)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium rounded-lg transition-colors"
-                      title="View Material"
-                      disabled={!material.fileName}
-                    >
-                      <FaEye size={14} />
-                      <span className="text-xs">View</span>
-                    </button>
-                    <Link
-                      to={`/materials/edit/${material.id}`}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 font-medium rounded-lg transition-colors"
-                      title="Edit"
-                    >
-                      <FaEdit size={14} />
-                      <span className="text-xs">Edit</span>
-                    </Link>
-                    <button
-                      onClick={() => handleUploadFile(material)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-600 font-medium rounded-lg transition-colors"
-                      title="Upload File"
-                    >
-                      <FaUpload size={14} />
-                      <span className="text-xs">Upload</span>
-                    </button>
-                    <button
-                      // onClick={() => handleDelete(material.id)}
-                      className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors disabled:opacity-50"
-                      title="Delete"
-                      disabled
-                    >
-                      <FaTrash size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <FaDatabase className="mx-auto text-gray-300 mb-4" size={64} />
-            <p className="text-lg text-gray-500 mb-2">No materials found</p>
-            <p className="text-sm text-gray-400">
-              {searchTerm ||
-              selectedGrade ||
-              selectedArea ||
-              selectedResourceType
-                ? "Try adjusting your search or filters"
-                : "Upload metadata to get started"}
-            </p>
-          </div>
+                    </TableCell>
+                    <TableCell>
+                      {material.fileName ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                          <svg
+                            className="w-3 h-3"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Has File
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                          No File
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewMaterial(material.id)}
+                          className="h-8 w-8"
+                          title="View Material"
+                          disabled={!material.fileName}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          asChild
+                          className="h-8 w-8"
+                          title="Edit"
+                        >
+                          <Link to={`/materials/edit/${material.id}`}>
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleUploadFile(material)}
+                          className="h-8 w-8"
+                          title="Upload File"
+                        >
+                          <Upload className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="Delete"
+                          disabled
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         )}
       </div>
 
+      {/* Filters Dialog */}
+      <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Filter materials</DialogTitle>
+            <DialogDescription>
+              Refine the list by resource type, learning area, and grade level.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Resource Type Filter */}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-gray-700">
+                Resource Type
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-9 w-full justify-between"
+                  >
+                    {selectedResourceType || "All Resource Types"}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full max-w-sm">
+                  <DropdownMenuRadioGroup
+                    value={selectedResourceType}
+                    onValueChange={(value) => {
+                      setSelectedResourceType(value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <DropdownMenuRadioItem value="">
+                      All Resource Types
+                    </DropdownMenuRadioItem>
+                    {resourceTypes.map((type) => (
+                      <DropdownMenuRadioItem key={type.id} value={type.name}>
+                        {type.name}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Learning Area Filter */}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-gray-700">
+                Learning Area
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-9 w-full justify-between"
+                  >
+                    {selectedArea || "All Learning Areas"}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full max-w-sm">
+                  <DropdownMenuRadioGroup
+                    value={selectedArea}
+                    onValueChange={(value) => {
+                      setSelectedArea(value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <DropdownMenuRadioItem value="">
+                      All Learning Areas
+                    </DropdownMenuRadioItem>
+                    {learningAreas.map((area) => (
+                      <DropdownMenuRadioItem key={area.id} value={area.name}>
+                        {area.name}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Grade Level Filter */}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-gray-700">
+                Grade Level
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-9 w-full justify-between"
+                  >
+                    {selectedGrade || "All Grade Levels"}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full max-w-sm">
+                  <DropdownMenuRadioGroup
+                    value={selectedGrade}
+                    onValueChange={(value) => {
+                      setSelectedGrade(value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <DropdownMenuRadioItem value="">
+                      All Grade Levels
+                    </DropdownMenuRadioItem>
+                    {gradeLevels.map((grade) => (
+                      <DropdownMenuRadioItem key={grade.id} value={grade.name}>
+                        {grade.name}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Clear Filters Button */}
+            {(selectedResourceType || selectedArea || selectedGrade) && (
+              <div className="pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedResourceType("");
+                    setSelectedArea("");
+                    setSelectedGrade("");
+                    setCurrentPage(1);
+                  }}
+                  className="w-full justify-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Clear filters
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsFilterDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="bg-white rounded-xl shadow-md px-6 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-gray-600">
-              Showing{" "}
-              <span className="font-semibold text-gray-900">
-                {filteredMaterials.length === 0
-                  ? 0
-                  : (currentPage - 1) * itemsPerPage + 1}
-              </span>{" "}
-              to{" "}
-              <span className="font-semibold text-gray-900">
-                {Math.min(currentPage * itemsPerPage, filteredMaterials.length)}
-              </span>{" "}
-              of{" "}
-              <span className="font-semibold text-gray-900">
-                {filteredMaterials.length}
-              </span>{" "}
-              materials
-            </div>
-            <div>
-              <div className="flex gap-2">
-                {/* Previous Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
+        <div className="flex items-center justify-center gap-2">
+          {/* Previous Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
 
-                {/* Page Numbers */}
-                <div className="flex gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((page) => {
-                      return (
-                        page === 1 ||
-                        page === totalPages ||
-                        Math.abs(currentPage - page) <= 1
-                      );
-                    })
-                    .map((page, index, array) => {
-                      if (index > 0 && array[index - 1] !== page - 1) {
-                        return (
-                          <React.Fragment key={`ellipsis-${page}`}>
-                            <span className="px-3 py-2 text-gray-500">...</span>
-                            <button
-                              onClick={() => handlePageChange(page)}
-                              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                currentPage === page
-                                  ? "bg-blue-600 text-white shadow-md"
-                                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          </React.Fragment>
-                        );
-                      }
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                            currentPage === page
-                              ? "bg-blue-600 text-white shadow-md"
-                              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    })}
-                </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+          {/* Page Numbers */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePageChange(page)}
+                className="min-w-[40px]"
+              >
+                {page}
+              </Button>
+            ))}
           </div>
+
+          {/* Next Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
         </div>
       )}
 
       {/* Metadata Upload Modal */}
-      {isMetadataModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Upload Materials Metadata
-            </h2>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Select Excel File
-              </label>
-              <input
+      <Dialog
+        open={isMetadataModalOpen}
+        onOpenChange={(open) => {
+          setIsMetadataModalOpen(open);
+          if (!open) {
+            setMetadataFile(null);
+            setMetadataError(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Materials Metadata</DialogTitle>
+            <DialogDescription>
+              Select an Excel file to upload materials metadata
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Excel File</label>
+              <Input
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleMetadataFileChange}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 disabled={isMetadataUploading}
               />
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 Only Excel files (.xlsx, .xls) are accepted
               </p>
             </div>
 
             {metadataError && (
-              <div className="mb-4 p-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded">
+              <div className="p-3 bg-red-100 text-red-700 rounded text-sm">
                 {metadataError}
               </div>
             )}
-
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setIsMetadataModalOpen(false);
-                  setMetadataFile(null);
-                  setMetadataError(null);
-                }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                disabled={isMetadataUploading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleMetadataUpload}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isMetadataUploading}
-              >
-                {isMetadataUploading ? "Uploading..." : "Upload"}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsMetadataModalOpen(false);
+                setMetadataFile(null);
+                setMetadataError(null);
+              }}
+              disabled={isMetadataUploading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleMetadataUpload}
+              disabled={isMetadataUploading}
+            >
+              {isMetadataUploading ? "Uploading..." : "Upload"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* File Upload Modal */}
-      {isUploadModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Upload File for {selectedMaterial?.title}
-            </h2>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Select File
-              </label>
-              <input
+      <Dialog
+        open={isUploadModalOpen}
+        onOpenChange={(open) => {
+          setIsUploadModalOpen(open);
+          if (!open) {
+            setUploadFile(null);
+            setUploadError(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload File for {selectedMaterial?.title}</DialogTitle>
+            <DialogDescription>
+              Select a file to upload for this material
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select File</label>
+              <Input
                 type="file"
                 onChange={handleFileChange}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 disabled={isUploading}
               />
             </div>
 
             {uploadError && (
-              <div className="mb-4 p-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded">
+              <div className="p-3 bg-red-100 text-red-700 rounded text-sm">
                 {uploadError}
               </div>
             )}
-
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setIsUploadModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                disabled={isUploading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUploadSubmit}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isUploading}
-              >
-                {isUploading ? "Uploading..." : "Upload"}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsUploadModalOpen(false)}
+              disabled={isUploading}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUploadSubmit} disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Upload"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* View Material Modal */}
-      <Modal
-        isOpen={isViewModalOpen}
-        onRequestClose={() => {
-          setIsViewModalOpen(false);
-          setViewMaterialUrl(null);
-          setViewMaterialTitle("");
+      <Dialog
+        open={isViewModalOpen}
+        onOpenChange={(open) => {
+          setIsViewModalOpen(open);
+          if (!open) {
+            setViewMaterialUrl(null);
+            setViewMaterialTitle("");
+          }
         }}
-        contentLabel="View Material"
-        className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999]"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[9998]"
       >
-        <div className="bg-white rounded-xl w-full max-w-4xl h-[80vh] flex flex-col shadow-2xl relative z-[9999] p-0">
+        <DialogContent className="max-w-4xl w-full h-[80vh] p-0 flex flex-col [&>button]:text-white [&>button]:hover:text-blue-100 [&>button]:right-4 [&>button]:top-4">
           {/* Modal Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 rounded-t-xl flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-1">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 pt-6 pb-4 rounded-t-lg">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-white mb-1">
                 {viewMaterialTitle || "View Material"}
-              </h2>
-              <p className="text-sm text-blue-100">
+              </DialogTitle>
+              <DialogDescription className="text-sm text-blue-100">
                 Learning Resource Material
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                setIsViewModalOpen(false);
-                setViewMaterialUrl(null);
-                setViewMaterialTitle("");
-              }}
-              className="text-white hover:text-blue-100 transition-colors duration-200 p-2 rounded-full hover:bg-blue-500"
-              aria-label="Close"
-            >
-              <span className="text-3xl leading-none">&times;</span>
-            </button>
+              </DialogDescription>
+            </DialogHeader>
           </div>
           {/* Content Section */}
-          <div className="flex-1 bg-white rounded-b-xl p-6 overflow-hidden">
+          <div className="flex-1 bg-white rounded-b-lg p-6 overflow-hidden">
             {viewMaterialUrl ? (
               <iframe
                 src={viewMaterialUrl}
@@ -1101,8 +1042,8 @@ const MaterialsManagement = () => {
               </div>
             )}
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

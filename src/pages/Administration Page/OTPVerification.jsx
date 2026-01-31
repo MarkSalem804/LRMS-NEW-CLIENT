@@ -100,12 +100,45 @@ const OTPVerification = () => {
     setError("");
     try {
       const res = await userService.verifyOtp(email, otp);
-      if (res?.success && res.data?.user) {
+      // Response structure: { success: true, message: "OTP verified successfully", data: { user: userData, token: token } }
+      const userData = res?.data?.user || res?.user;
+      const token = res?.data?.token || res?.token;
+
+      console.log("🔍 [OTP Verification] Full response:", res);
+      console.log("🔍 [OTP Verification] User data:", userData);
+      console.log(
+        "🔍 [OTP Verification] Token:",
+        token ? token.substring(0, 30) + "..." : "No token found"
+      );
+
+      if (res?.success && userData) {
         setToast("Successfully Logged in");
         setTimeout(() => {
-          setAuth(res.data.user);
-          localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
-          if (res.data.user.role === "TEACHER") {
+          // Store user data in localStorage
+          setAuth(userData);
+          localStorage.setItem("lrms-auth", JSON.stringify(userData));
+
+          // Store JWT token securely in localStorage
+          if (token) {
+            localStorage.setItem("lrms-token", token);
+            console.log(
+              "✅ [OTP Verification] JWT token stored successfully after OTP verification"
+            );
+            console.log(
+              "🔍 [OTP Verification] Token value (first 30 chars):",
+              token.substring(0, 30) + "..."
+            );
+          } else {
+            console.error(
+              "❌ [OTP Verification] No JWT token received from server after OTP verification"
+            );
+            console.error(
+              "❌ [OTP Verification] Response structure:",
+              JSON.stringify(res, null, 2)
+            );
+          }
+
+          if (userData.role === "Teacher") {
             navigate("/client-page");
           } else {
             navigate("/dashboard");

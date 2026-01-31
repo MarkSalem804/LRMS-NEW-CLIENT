@@ -1,31 +1,26 @@
-import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import {
+  SidebarProvider,
+  SidebarInset,
+  // SidebarTrigger,
+} from "@/components/shadcn-components/ui/sidebar";
 import Header from "./Header";
-import Sidebar from "./Sidebar";
+import AdminSidebar from "./AdminSidebar";
 
 const Layout = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
-
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar isCollapsed={isSidebarCollapsed} onToggle={toggleSidebar} />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header/Topbar */}
+    <SidebarProvider>
+      <AdminSidebar />
+      <SidebarInset>
+        {/* Header with Sidebar Trigger */}
         <Header />
 
         {/* Content Area - Renders nested routes */}
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 

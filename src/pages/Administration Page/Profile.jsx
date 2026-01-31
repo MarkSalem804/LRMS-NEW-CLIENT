@@ -10,6 +10,7 @@ import {
   FaMapMarkerAlt,
 } from "react-icons/fa";
 import UserProfileModal from "../../components/modals/UserProfileModal";
+import { formatRoleDisplay } from "../../utils/roleFormatter";
 
 const Profile = () => {
   const { auth } = useStateContext();
@@ -165,7 +166,7 @@ const Profile = () => {
             </h1>
             <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-3">
               <span className="inline-flex items-center px-3 py-1 bg-blue-500 rounded-full text-sm font-medium">
-                {userProfile.role || "User"}
+                {formatRoleDisplay(userProfile.role) || "User"}
               </span>
               {userProfile.employeeId && userProfile.employeeId !== "N/A" && (
                 <span className="inline-flex items-center px-3 py-1 bg-blue-500/50 rounded-full text-sm">

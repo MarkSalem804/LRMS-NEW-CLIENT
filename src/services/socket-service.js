@@ -1,8 +1,7 @@
 import { io } from "socket.io-client";
 
-// const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
-const SOCKET_URL =
-  import.meta.env.VITE_API_URL || "https://ilearn-beta.depedimuscity.com:5001";
+const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+// const SOCKET_URL = import.meta.env.VITE_API_URL || "https://sdoic-ilearn.depedimuscity.com:5005";
 
 let socket = null;
 

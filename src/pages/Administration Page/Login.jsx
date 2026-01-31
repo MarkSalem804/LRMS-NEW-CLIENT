@@ -146,11 +146,49 @@ const Login = () => {
             showSuccessMessage("Successfully Logged in");
           }
           setTimeout(() => {
-            setAuth(res.data.user);
-            localStorage.setItem("lrms-auth", JSON.stringify(res.data.user));
+            // Store user data in localStorage
+            // Response structure: { success: true, message: "Login successful", data: { user: userData, token: token } }
+            const userData = res.data?.data?.user || res.data?.user;
+            const token = res.data?.data?.token || res.data?.token;
+
+            console.log("🔍 [Login Handler] Full response:", res.data);
+            console.log("🔍 [Login Handler] res.data.data:", res.data?.data);
+            console.log("🔍 [Login Handler] User data:", userData);
+            console.log(
+              "🔍 [Login Handler] Token:",
+              token ? token.substring(0, 30) + "..." : "No token found"
+            );
+
+            if (userData) {
+              setAuth(userData);
+              localStorage.setItem("lrms-auth", JSON.stringify(userData));
+            } else {
+              console.error(
+                "❌ [Login Handler] No user data received from server"
+              );
+            }
+
+            // Store JWT token securely in localStorage
+            if (token) {
+              localStorage.setItem("lrms-token", token);
+              console.log("✅ [Login Handler] JWT token stored successfully");
+              console.log(
+                "🔍 [Login Handler] Token value (first 30 chars):",
+                token.substring(0, 30) + "..."
+              );
+            } else {
+              console.error(
+                "❌ [Login Handler] No JWT token received from server"
+              );
+              console.error(
+                "❌ [Login Handler] Response structure:",
+                JSON.stringify(res.data, null, 2)
+              );
+            }
+
             // Redirect based on user role
-            if (res.data.user.role === "TEACHER") {
-              navigate("/client-page");
+            if (userData && userData.role === "Teacher") {
+              navigate("/teacher/dashboard");
             } else {
               navigate("/dashboard");
             }

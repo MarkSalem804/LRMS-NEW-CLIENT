@@ -6,7 +6,10 @@ function Sidebar({ isCollapsed, onToggle }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Clear all auth-related storage including JWT token
     localStorage.removeItem("lrms-auth");
+    localStorage.removeItem("lrms-token"); // Clear JWT token
+    sessionStorage.removeItem("lrms-auth");
     navigate("/login");
   };
 

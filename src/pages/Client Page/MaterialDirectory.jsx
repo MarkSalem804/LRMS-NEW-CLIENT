@@ -40,42 +40,44 @@ const MaterialDirectory = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-poppins">
       <ClientHeader />
-      <main className="flex-grow container mx-auto px-4 py-12">
+      <main className="flex-grow container mx-auto px-2 sm:px-4 py-6 sm:py-8 md:py-12">
         {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+        <div className="text-center mb-6 sm:mb-8 md:mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
             Learning Materials Directory
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-sm sm:text-base md:text-lg px-2">
             Browse and access educational resources by level
           </p>
         </div>
 
         {/* Education Level Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
           {levels.map((level) => (
             <Link
               to={level.link}
               key={level.name}
-              className={`bg-gradient-to-r ${level.color} rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 p-6 group relative overflow-hidden`}
+              className={`bg-gradient-to-r ${level.color} rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 p-4 sm:p-5 md:p-6 group relative overflow-hidden`}
             >
               {/* Icon Badge */}
-              <div className="absolute top-4 right-4 w-16 h-16 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-                <span className="text-4xl">{level.icon}</span>
+              <div className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                <span className="text-2xl sm:text-3xl md:text-4xl">
+                  {level.icon}
+                </span>
               </div>
 
               {/* Card Content */}
-              <div className="relative z-10 pt-2 pr-20">
-                <h3 className="text-xl font-bold text-gray-800 mb-3">
+              <div className="relative z-10 pt-2 pr-16 sm:pr-18 md:pr-20">
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-2 sm:mb-3">
                   {level.name}
                 </h3>
-                <p className="text-sm text-gray-600 mb-6 min-h-[48px] leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-5 md:mb-6 min-h-[40px] sm:min-h-[48px] leading-relaxed">
                   {level.description}
                 </p>
-                <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg font-semibold text-gray-700 text-sm group-hover:bg-white transition-colors">
+                <div className="inline-flex items-center gap-1 sm:gap-2 bg-white/90 backdrop-blur-sm px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-gray-700 text-xs sm:text-sm group-hover:bg-white transition-colors">
                   <span>{level.count}</span>
                   <svg
-                    className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                    className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -94,23 +96,23 @@ const MaterialDirectory = () => {
         </div>
 
         {/* Info Section */}
-        <div className="mt-16 max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-md p-8">
+        <div className="mt-8 sm:mt-12 md:mt-16 max-w-4xl mx-auto px-2 sm:px-4">
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 md:p-8">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                 Welcome to ILeaRN Portal
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-4 sm:mb-5 md:mb-6 px-2">
                 Access a comprehensive collection of learning resources designed
                 to support quality education. Browse materials by education
                 level and find the resources you need for effective teaching and
                 learning.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mt-6 sm:mt-7 md:mt-8">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
                     <svg
-                      className="w-6 h-6 text-blue-600"
+                      className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -123,17 +125,17 @@ const MaterialDirectory = () => {
                       />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">
                     Browse Materials
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Explore curated resources by grade level
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
                     <svg
-                      className="w-6 h-6 text-green-600"
+                      className="w-5 h-5 sm:w-6 sm:h-6 text-green-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -146,17 +148,17 @@ const MaterialDirectory = () => {
                       />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">
                     Download Resources
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Save materials for offline access
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2 sm:mb-3">
                     <svg
-                      className="w-6 h-6 text-purple-600"
+                      className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -169,10 +171,10 @@ const MaterialDirectory = () => {
                       />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">
                     Search & Filter
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Find specific materials quickly
                   </p>
                 </div>

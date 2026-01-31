@@ -1,5 +1,6 @@
 export { default as Login } from "../pages/Administration Page/Login";
 export { default as Dashboard } from "../pages/Administration Page/Dashboard";
+export { default as ClientDashboard } from "../pages/Administration Page/ClientDashboard";
 export { default as Materials } from "../pages/Administration Page/Materials";
 export { default as Security } from "../pages/Administration Page/Security";
 export { default as Profile } from "../pages/Administration Page/Profile";

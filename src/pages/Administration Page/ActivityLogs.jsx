@@ -1,20 +1,51 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import {
-  FaHistory,
-  FaUser,
-  FaClock,
-  FaFilter,
-  FaSearch,
-  FaTrash,
-  FaRedo,
-  FaFileExcel,
-  FaDownload,
-} from "react-icons/fa";
+  Search,
+  Filter,
+  History,
+  User,
+  Clock,
+  RefreshCw,
+  Download,
+  FileSpreadsheet,
+  Trash2,
+  ChevronDown,
+  Database,
+} from "lucide-react";
+import { Button } from "@/components/shadcn-components/ui/button";
+import { Input } from "@/components/shadcn-components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn-components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shadcn-components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shadcn-components/ui/dialog";
+import { toast } from "sonner";
 import activityLogService from "../../services/activity-log-endpoints";
-import Swal from "sweetalert2";
+import { formatRoleDisplay } from "../../utils/roleFormatter";
 
 const ActivityLogs = () => {
+  const location = useLocation();
+  const isUserLogsPage = location.pathname === "/logs/user-logs";
+
   const [logs, setLogs] = useState([]);
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +53,10 @@ const ActivityLogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 10;
+
+  // Filter dialog state
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
 
   // Activity type filters
   const activityTypes = [
@@ -46,10 +80,8 @@ const ActivityLogs = () => {
       setTotalCount(response.pagination?.total || response.data?.length || 0);
     } catch (error) {
       console.error("Error fetching activity logs:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to fetch activity logs",
+      toast.error("Error", {
+        description: "Failed to fetch activity logs",
       });
     } finally {
       setLoading(false);
@@ -63,6 +95,40 @@ const ActivityLogs = () => {
   // Filter and search logs
   useEffect(() => {
     let filtered = [...logs];
+
+    // Split base logs by page type
+    filtered = filtered.filter((log) => {
+      const activity = log.activity?.toLowerCase() || "";
+
+      if (isUserLogsPage) {
+        // User-focused events only
+        return (
+          activity.includes("login") ||
+          activity.includes("logged in") ||
+          activity.includes("logout") ||
+          activity.includes("logged out") ||
+          activity.includes("password") ||
+          activity.includes("profile") ||
+          activity.includes("user") ||
+          activity.includes("security") ||
+          activity.includes("two-factor") ||
+          activity.includes("2fa")
+        );
+      }
+
+      // Activity logs: materials & reports oriented
+      return (
+        activity.includes("material") ||
+        activity.includes("download") ||
+        activity.includes("viewed") ||
+        activity.includes("report") ||
+        activity.includes("export") ||
+        activity.includes("generated report") ||
+        activity.includes("created") ||
+        activity.includes("updated") ||
+        activity.includes("deleted")
+      );
+    });
 
     // Apply activity type filter
     if (filterType !== "all") {
@@ -112,13 +178,18 @@ const ActivityLogs = () => {
 
     setFilteredLogs(filtered);
     setCurrentPage(1); // Reset to first page when filtering
-  }, [searchTerm, filterType, logs]);
+  }, [searchTerm, filterType, logs, isUserLogsPage]);
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Format date
   const formatDate = (dateString) => {
@@ -133,100 +204,33 @@ const ActivityLogs = () => {
     });
   };
 
-  // Get activity icon and color
-  const getActivityStyle = (activity) => {
-    const activityLower = activity?.toLowerCase() || "";
-
-    if (
-      activityLower.includes("login") ||
-      activityLower.includes("logged in")
-    ) {
-      return { icon: "🔓", color: "text-green-600", bg: "bg-green-100" };
-    }
-    if (
-      activityLower.includes("logout") ||
-      activityLower.includes("logged out")
-    ) {
-      return { icon: "🔒", color: "text-gray-600", bg: "bg-gray-100" };
-    }
-    if (activityLower.includes("failed")) {
-      return { icon: "⚠️", color: "text-red-600", bg: "bg-red-100" };
-    }
-    if (
-      activityLower.includes("created") ||
-      activityLower.includes("registered")
-    ) {
-      return { icon: "➕", color: "text-blue-600", bg: "bg-blue-100" };
-    }
-    if (activityLower.includes("updated")) {
-      return { icon: "✏️", color: "text-yellow-600", bg: "bg-yellow-100" };
-    }
-    if (activityLower.includes("deleted")) {
-      return { icon: "🗑️", color: "text-red-600", bg: "bg-red-100" };
-    }
-    if (activityLower.includes("material")) {
-      return { icon: "📚", color: "text-purple-600", bg: "bg-purple-100" };
-    }
-    if (activityLower.includes("profile")) {
-      return { icon: "👤", color: "text-indigo-600", bg: "bg-indigo-100" };
-    }
-    if (activityLower.includes("password")) {
-      return { icon: "🔑", color: "text-orange-600", bg: "bg-orange-100" };
-    }
-    return { icon: "📝", color: "text-gray-600", bg: "bg-gray-100" };
-  };
-
   // Handle cleanup
   const handleCleanup = async () => {
-    const result = await Swal.fire({
-      title: "Delete Old Activity Logs?",
-      text: "This will delete activity logs older than 90 days. This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete them!",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await activityLogService.deleteOldActivityLogs(90);
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Old activity logs deleted successfully",
-        });
-        fetchActivityLogs();
-      } catch {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Failed to delete old activity logs",
-        });
-      }
+    try {
+      await activityLogService.deleteOldActivityLogs(90);
+      toast.success("Success", {
+        description: "Old activity logs deleted successfully",
+      });
+      fetchActivityLogs();
+    } catch {
+      toast.error("Error", {
+        description: "Failed to delete old activity logs",
+      });
     }
   };
 
   // Handle Excel export (filtered logs)
   const handleExportFiltered = async () => {
     if (filteredLogs.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "No Data",
-        text: "No activity logs to export",
+      toast.warning("No Data", {
+        description: "No activity logs to export",
       });
       return;
     }
 
     try {
-      // Show loading
-      Swal.fire({
-        title: "Generating Report...",
-        text: "Please wait while we generate your Excel file",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
+      toast.loading("Generating Report...", {
+        description: "Please wait while we generate your Excel file",
       });
 
       const response = await activityLogService.exportActivityLogs(
@@ -235,33 +239,24 @@ const ActivityLogs = () => {
       );
 
       if (response.success) {
-        // Close loading and show success with download link
-        Swal.fire({
-          icon: "success",
-          title: "Report Generated!",
-          html: `
-            <p><strong>${response.data.recordCount}</strong> activity logs exported</p>
-            <p>File: <strong>${response.data.fileName}</strong></p>
-            <p class="text-sm text-gray-600 mt-2">Saved in reports folder on server</p>
-          `,
-          showCancelButton: true,
-          confirmButtonText: "Download Now",
-          cancelButtonText: "Close",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Download the file
-            const downloadUrl = activityLogService.downloadReport(
-              response.data.fileName
-            );
-            window.open(downloadUrl, "_blank");
-          }
+        toast.dismiss();
+        toast.success("Report Generated!", {
+          description: `${response.data.recordCount} activity logs exported. File: ${response.data.fileName}`,
+          action: {
+            label: "Download",
+            onClick: () => {
+              const downloadUrl = activityLogService.downloadReport(
+                response.data.fileName
+              );
+              window.open(downloadUrl, "_blank");
+            },
+          },
         });
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Export Failed",
-        text: error.message || "Failed to export activity logs",
+      toast.dismiss();
+      toast.error("Export Failed", {
+        description: error.message || "Failed to export activity logs",
       });
     }
   };
@@ -269,23 +264,16 @@ const ActivityLogs = () => {
   // Handle Excel export with summary (all logs)
   const handleExportWithSummary = async () => {
     if (logs.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "No Data",
-        text: "No activity logs to export",
+      toast.warning("No Data", {
+        description: "No activity logs to export",
       });
       return;
     }
 
     try {
-      // Show loading
-      Swal.fire({
-        title: "Generating Complete Report...",
-        text: "Please wait while we generate your comprehensive Excel report",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
+      toast.loading("Generating Complete Report...", {
+        description:
+          "Please wait while we generate your comprehensive Excel report",
       });
 
       const response = await activityLogService.exportActivityLogsWithSummary(
@@ -293,336 +281,394 @@ const ActivityLogs = () => {
       );
 
       if (response.success) {
-        // Close loading and show success with download link
-        Swal.fire({
-          icon: "success",
-          title: "Complete Report Generated!",
-          html: `
-            <p><strong>${
-              response.data.recordCount
-            }</strong> activity logs exported</p>
-            <p>File: <strong>${response.data.fileName}</strong></p>
-            <p class="text-sm text-gray-600 mt-2">
-              Includes ${response.data.sheets.join(", ")} sheets
-            </p>
-            <p class="text-sm text-gray-600">Saved in reports folder on server</p>
-          `,
-          showCancelButton: true,
-          confirmButtonText: "Download Now",
-          cancelButtonText: "Close",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Download the file
-            const downloadUrl = activityLogService.downloadReport(
-              response.data.fileName
-            );
-            window.open(downloadUrl, "_blank");
-          }
+        toast.dismiss();
+        toast.success("Complete Report Generated!", {
+          description: `${
+            response.data.recordCount
+          } activity logs exported. Includes ${response.data.sheets.join(
+            ", "
+          )} sheets.`,
+          action: {
+            label: "Download",
+            onClick: () => {
+              const downloadUrl = activityLogService.downloadReport(
+                response.data.fileName
+              );
+              window.open(downloadUrl, "_blank");
+            },
+          },
         });
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Export Failed",
-        text: error.message || "Failed to generate report",
+      toast.dismiss();
+      toast.error("Export Failed", {
+        description: error.message || "Failed to generate report",
       });
     }
   };
 
+  // Calculate stats
+  const todayLogs = logs.filter((log) => {
+    const logDate = new Date(log.createdAt);
+    const today = new Date();
+    return logDate.toDateString() === today.toDateString();
+  });
+
+  const activeUsersToday = new Set(
+    todayLogs.map((log) => log.userId).filter(Boolean)
+  ).size;
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-md p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <FaHistory className="text-3xl" />
-              <h1 className="text-3xl font-bold">Activity Logs</h1>
-            </div>
-            <p className="text-blue-100">
-              Monitor and track all system activities
-            </p>
-          </div>
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={fetchActivityLogs}
-              className="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-              title="Refresh logs"
-            >
-              <FaRedo />
-              <span className="hidden md:inline">Refresh</span>
-            </button>
-            <button
-              onClick={handleExportFiltered}
-              className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors"
-              title="Export filtered results to Excel"
-            >
-              <FaDownload />
-              <span className="hidden md:inline">Export Filtered</span>
-            </button>
-            <button
-              onClick={handleExportWithSummary}
-              className="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
-              title="Export complete report with summary"
-            >
-              <FaFileExcel />
-              <span className="hidden md:inline">Full Report</span>
-            </button>
-            <button
-              onClick={handleCleanup}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors"
-              title="Delete logs older than 90 days"
-            >
-              <FaTrash />
-              <span className="hidden md:inline">Cleanup</span>
-            </button>
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isUserLogsPage ? "User Logs" : "Activity Logs"}
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            {isUserLogsPage
+              ? "Monitor user authentication and profile activities"
+              : "Monitor and track all system activities"}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchActivityLogs}
+            className="gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportFiltered}
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export Filtered
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportWithSummary}
+            className="gap-2"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            Full Report
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCleanup}
+            className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+            Cleanup
+          </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm mb-1">Total Activities</p>
-              <p className="text-2xl font-bold text-gray-800">{totalCount}</p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FaHistory className="text-blue-600 text-xl" />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Total Activities Card */}
+        <div className="bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 relative overflow-hidden group cursor-pointer">
+          <div className="relative z-10">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Total Activities
+            </h3>
+            <p className="text-2xl font-bold text-gray-800 mb-2">
+              {totalCount}
+            </p>
           </div>
+          <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+            <History className="w-8 h-8 text-blue-600" />
+          </div>
+          <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+            All activities
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm mb-1">Filtered Results</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {filteredLogs.length}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <FaFilter className="text-green-600 text-xl" />
-            </div>
+        {/* Filtered Results Card */}
+        <div className="bg-gradient-to-r from-green-200 to-blue-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 relative overflow-hidden group cursor-pointer">
+          <div className="relative z-10">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Filtered Results
+            </h3>
+            <p className="text-2xl font-bold text-gray-800 mb-2">
+              {filteredLogs.length}
+            </p>
           </div>
+          <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+            <Filter className="w-8 h-8 text-green-600" />
+          </div>
+          <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+            Current filter results
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm mb-1">
-                Today&apos;s Activities
-              </p>
-              <p className="text-2xl font-bold text-gray-800">
-                {
-                  logs.filter((log) => {
-                    const logDate = new Date(log.createdAt);
-                    const today = new Date();
-                    return logDate.toDateString() === today.toDateString();
-                  }).length
-                }
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <FaClock className="text-purple-600 text-xl" />
-            </div>
+        {/* Today's Activities Card */}
+        <div className="bg-gradient-to-r from-purple-200 to-pink-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 relative overflow-hidden group cursor-pointer">
+          <div className="relative z-10">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Today&apos;s Activities
+            </h3>
+            <p className="text-2xl font-bold text-gray-800 mb-2">
+              {todayLogs.length}
+            </p>
           </div>
+          <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+            <Clock className="w-8 h-8 text-purple-600" />
+          </div>
+          <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+            Activities today
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm mb-1">Active Users Today</p>
-              <p className="text-2xl font-bold text-gray-800">
-                {
-                  new Set(
-                    logs
-                      .filter((log) => {
-                        const logDate = new Date(log.createdAt);
-                        const today = new Date();
-                        return logDate.toDateString() === today.toDateString();
-                      })
-                      .map((log) => log.userId)
-                  ).size
-                }
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <FaUser className="text-orange-600 text-xl" />
-            </div>
+        {/* Active Users Today Card */}
+        <div className="bg-gradient-to-r from-orange-200 to-yellow-200 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 relative overflow-hidden group cursor-pointer">
+          <div className="relative z-10">
+            <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              Active Users Today
+            </h3>
+            <p className="text-2xl font-bold text-gray-800 mb-2">
+              {activeUsersToday}
+            </p>
           </div>
+          <div className="absolute top-3 right-3 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 p-2">
+            <User className="w-8 h-8 text-orange-600" />
+          </div>
+          <p className="text-xs text-gray-600 mt-1.5 relative z-10">
+            Unique users today
+          </p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
+      {/* Search Bar and Filters */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
               placeholder="Search by user, email, or activity..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-10"
             />
           </div>
-
-          {/* Activity Type Filter */}
-          <div className="relative">
-            <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-            >
-              {activityTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+          <div className="text-sm text-gray-600">
+            Showing{" "}
+            {filteredLogs.length === 0
+              ? 0
+              : (currentPage - 1) * itemsPerPage + 1}
+            -{Math.min(currentPage * itemsPerPage, filteredLogs.length)} of{" "}
+            {filteredLogs.length} log(s)
           </div>
+        </div>
+
+        {/* Filters Trigger */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm text-gray-600"></div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setIsFilterDialogOpen(true)}
+          >
+            <Filter className="h-4 w-4" />
+            Open filters
+            {filterType !== "all" && (
+              <span className="ml-2 h-2 w-2 rounded-full bg-blue-500" />
+            )}
+          </Button>
         </div>
       </div>
 
-      {/* Activity Logs Table */}
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+      {/* Logs Table */}
+      <div className="border rounded-lg bg-white">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : currentLogs.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <FaHistory className="text-6xl mx-auto mb-4 text-gray-300" />
-            <p className="text-lg">No activity logs found</p>
+            <div className="text-gray-600">Loading logs...</div>
           </div>
         ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                      Activity
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                      Date & Time
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {currentLogs.map((log, index) => {
-                    const style = getActivityStyle(log.activity);
-                    return (
-                      <motion.tr
-                        key={log.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-10 h-10 ${style.bg} rounded-lg flex items-center justify-center flex-shrink-0`}
-                            >
-                              <span className="text-xl">{style.icon}</span>
-                            </div>
-                            <span
-                              className={`text-sm font-medium ${style.color}`}
-                            >
-                              {log.activity || "No description"}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {log.user ? (
-                            <div>
-                              <p className="text-sm font-semibold text-gray-900">
-                                {log.user.firstName} {log.user.lastName}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {log.user.email}
-                              </p>
-                              <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                {log.user.role}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-sm text-gray-500">
-                              System / Unknown
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <FaClock className="text-gray-400" />
-                            {formatDate(log.createdAt)}
-                          </div>
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-700">
-                    Showing {indexOfFirstItem + 1} to{" "}
-                    {Math.min(indexOfLastItem, filteredLogs.length)} of{" "}
-                    {filteredLogs.length} entries
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                      }
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Previous
-                    </button>
-                    <div className="flex gap-1">
-                      {[...Array(totalPages)].map((_, i) => (
-                        <button
-                          key={i + 1}
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                            currentPage === i + 1
-                              ? "bg-blue-600 text-white"
-                              : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                          }`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Activity</TableHead>
+                <TableHead>User</TableHead>
+                <TableHead>Date & Time</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentLogs.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={3}
+                    className="text-center py-8 text-gray-500"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Database className="h-12 w-12 text-gray-300" />
+                      <p className="text-lg font-medium">No logs found</p>
+                      <p className="text-sm text-gray-400">
+                        {searchTerm || filterType !== "all"
+                          ? "Try adjusting your search or filters"
+                          : "No activity logs available"}
+                      </p>
                     </div>
-                    <button
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                      }
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentLogs.map((log) => {
+                  return (
+                    <TableRow key={log.id}>
+                      <TableCell>
+                        <span className="text-sm text-gray-900">
+                          {log.activity || "No description"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {log.user ? (
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {log.user.firstName} {log.user.lastName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {log.user.email}
+                            </p>
+                            <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                              {formatRoleDisplay(log.user.role)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-500">
+                            System / Unknown
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="h-4 w-4 text-gray-400" />
+                          {formatDate(log.createdAt)}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         )}
       </div>
+
+      {/* Filters Dialog */}
+      <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Filter logs</DialogTitle>
+            <DialogDescription>
+              Refine the list by activity type.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Activity Type Filter */}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-gray-700">
+                Activity Type
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-9 w-full justify-between"
+                  >
+                    {activityTypes.find((t) => t.value === filterType)?.label ||
+                      "All Activities"}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full max-w-sm">
+                  <DropdownMenuRadioGroup
+                    value={filterType}
+                    onValueChange={(value) => {
+                      setFilterType(value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    {activityTypes.map((type) => (
+                      <DropdownMenuRadioItem
+                        key={type.value}
+                        value={type.value}
+                      >
+                        {type.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFilterType("all");
+                setCurrentPage(1);
+              }}
+            >
+              Clear Filters
+            </Button>
+            <Button onClick={() => setIsFilterDialogOpen(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {/* Previous Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+
+          {/* Page Numbers */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePageChange(page)}
+                className="min-w-[40px]"
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
+
+          {/* Next Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

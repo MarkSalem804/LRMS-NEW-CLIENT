@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const customError = new Error("Network error or no response");
-// const BASE_URL = "http://localhost:5001";
-const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
+const BASE_URL = "http://localhost:5001";
+// const BASE_URL = "https://sdoic-ilearn.depedimuscity.com:5005";
 
 // Get all activity logs with pagination
 function getAllActivityLogs(limit = 100, offset = 0) {

@@ -12,7 +12,7 @@ const Hero = () => {
   // (removed password modal logic, only keep Hero content)
 
   return (
-    <div className="bg-white dark:bg-gray-800 h-[600px] md:h-[750px] flex items-center overflow-hidden relative">
+    <div className="bg-white dark:bg-gray-800 min-h-[400px] sm:min-h-[500px] md:h-[600px] lg:h-[750px] flex items-center overflow-hidden relative py-8 sm:py-12 md:py-0">
       {/* Decorative Blobs - More visible and darker */}
       <svg
         className="absolute left-[-100px] top-[-100px] w-[400px] h-[400px] opacity-50 text-blue-800 pointer-events-none z-0"
@@ -47,16 +47,16 @@ const Hero = () => {
           transform="translate(100 100)"
         />
       </svg>
-      <div className="container mx-auto px-4 py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <div className="container mx-auto px-2 sm:px-4 py-8 sm:py-12 md:py-16 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center">
           <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-6xl font-semibold text-gray-800 dark:text-white mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">
               ILeaRN Portal
             </h1>
-            <h2 className="text-2xl md:text-3xl text-blue-700 dark:text-blue-300 mb-4">
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-blue-700 dark:text-blue-300 mb-3 sm:mb-4">
               Imus Learning Resource Management System
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
               Schools Division Office of Imus City Learning Resource Management
               System (LRMS) Portal named I LeaRN (Imus Learning Resources
               Navigator) supports effective implementation of the Learning
@@ -71,7 +71,7 @@ const Hero = () => {
             <img
               src={heroImage}
               alt="Learning Resources"
-              className="w-full h-auto rounded-lg"
+              className="w-full h-auto rounded-lg max-w-md mx-auto md:max-w-full"
             />
           </div>
         </div>
@@ -145,50 +145,50 @@ const RecentMaterials = () => {
           transform="translate(100 100)"
         />
       </svg>
-      <div className="container mx-auto px-4 flex flex-col relative z-10">
-        <h2 className="text-3xl text-white mb-8 text-left">
+      <div className="container mx-auto px-2 sm:px-4 flex flex-col relative z-10">
+        <h2 className="text-xl sm:text-2xl md:text-3xl text-white mb-4 sm:mb-6 md:mb-8 text-left">
           Most Recent Materials
         </h2>
         <div className="flex-1">
           {isLoading ? (
-            <p className="text-center text-white w-full">
+            <p className="text-center text-white w-full text-sm sm:text-base">
               Loading materials...
             </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
               {materials.map((material) => (
                 <div
                   key={material.id}
                   className="bg-white/90 dark:bg-white/80 border border-blue-200 rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer hover:-translate-y-2 hover:shadow-xl hover:bg-blue-100/80 dark:hover:bg-blue-200/80"
                 >
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold text-primary-700 mb-2">
+                  <div className="p-3 sm:p-4 md:p-6">
+                    <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-primary-700 mb-2 line-clamp-2">
                       {material.title}
                     </h3>
-                    <div className="mb-2">
-                      <span className="inline-block text-sm text-blue-700 bg-blue-100 rounded px-2 py-0.5 mr-2">
+                    <div className="mb-2 flex flex-wrap gap-1 sm:gap-2">
+                      <span className="inline-block text-xs sm:text-sm text-blue-700 bg-blue-100 rounded px-1.5 sm:px-2 py-0.5">
                         {material.gradeLevelName || "No Grade"}
                       </span>
                       {material.learningAreaName ? (
-                        <span className="inline-block text-sm text-green-700 bg-green-100 rounded px-2 py-0.5">
+                        <span className="inline-block text-xs sm:text-sm text-green-700 bg-green-100 rounded px-1.5 sm:px-2 py-0.5">
                           {material.learningAreaName}
                         </span>
                       ) : (
                         <>
                           {material.trackName && (
-                            <span className="inline-block text-sm text-purple-700 bg-purple-100 rounded px-2 py-0.5 mr-2">
+                            <span className="inline-block text-xs sm:text-sm text-purple-700 bg-purple-100 rounded px-1.5 sm:px-2 py-0.5">
                               {material.trackName}
                             </span>
                           )}
                           {material.strandName && (
-                            <span className="inline-block text-sm text-pink-700 bg-pink-100 rounded px-2 py-0.5">
+                            <span className="inline-block text-xs sm:text-sm text-pink-700 bg-pink-100 rounded px-1.5 sm:px-2 py-0.5">
                               {material.strandName}
                             </span>
                           )}
                         </>
                       )}
                     </div>
-                    <p className="text-gray-700 font-normal">
+                    <p className="text-xs sm:text-sm md:text-base text-gray-700 font-normal line-clamp-3">
                       {material.description}
                     </p>
                   </div>

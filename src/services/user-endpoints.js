@@ -1,9 +1,8 @@
 import axios from "axios";
 
 const customError = new Error("Network error or no response");
-// const BASE_URL = "http://localhost:5001";
-const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
-// const BASE_URL = "https://ilearn-beta.depedimuscity.com:5001";
+const BASE_URL = "http://localhost:5001";
+// const BASE_URL = "https://sdoic-ilearn.depedimuscity.com:5005";
 
 function authenticate(account) {
   return new Promise((resolve, reject) => {
@@ -77,10 +76,29 @@ function registerUser(userData) {
   });
 }
 
-function deleteUser(id) {
-  return axios
-    .delete(`${BASE_URL}/users/deleteUser/${id}`)
-    .then((res) => res.data);
+function registerUserWithPicture(formData) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`${BASE_URL}/users/register`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      })
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
+}
+
+function deleteUser(id, adminUserId) {
+  const url = adminUserId
+    ? `${BASE_URL}/users/deleteUser/${id}?adminUserId=${adminUserId}`
+    : `${BASE_URL}/users/deleteUser/${id}`;
+  return axios.delete(url).then((res) => res.data);
 }
 
 function getUserProfile(id) {
@@ -99,6 +117,23 @@ function updateProfile(userId, profileData) {
   return axios
     .put(`${BASE_URL}/users/updateProfile/${userId}`, profileData)
     .then((res) => res.data);
+}
+
+function updateProfileWithPicture(userId, formData) {
+  return new Promise((resolve, reject) => {
+    axios
+      .put(`${BASE_URL}/users/updateProfile/${userId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((res) => resolve(res.data))
+      .catch((err) => {
+        if (err.response) {
+          reject(err.response.data);
+        } else {
+          reject(customError);
+        }
+      });
+  });
 }
 
 function changePassword(userId, profileData) {
@@ -236,9 +271,11 @@ export default {
   getUserProfile,
   getAllUsers,
   registerUser,
+  registerUserWithPicture,
   deleteUser,
   updateUser,
   updateProfile,
+  updateProfileWithPicture,
   changePassword,
   resetPassword,
   resendOtp,
